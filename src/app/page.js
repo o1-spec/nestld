@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import Image from "next/image";
 import {
   Search,
@@ -45,6 +45,79 @@ export default function HomeListingPage() {
   const [selectedAmenities, setSelectedAmenities] = useState([]);
   const [sortBy, setSortBy] = useState("newest");
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+
+  // Hero Carousel
+  const HERO_SLIDES = [
+    {
+      id: 1,
+      image: "/lasu_housing_hero.png",
+      badge: "🏠 Verified Listings",
+      heading: (
+        <>
+          Find Your Perfect Home <br />
+          <span className="bg-linear-to-r from-amber-400 to-amber-300 bg-clip-text text-transparent">
+            Near LASU
+          </span>
+        </>
+      ),
+      sub: "Verified student hostels, self-contained flats & 2-bedroom apartments around Ojo.",
+      accent: "from-purple-900/25 to-transparent",
+    },
+    {
+      id: 2,
+      image: "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&q=80&w=1400",
+      badge: "🤝 Roommate Matching",
+      heading: (
+        <>
+          Meet Your Perfect <br />
+          <span className="bg-linear-to-r from-emerald-400 to-cyan-300 bg-clip-text text-transparent">
+            Flatmate
+          </span>
+        </>
+      ),
+      sub: "Swipe through student profiles filtered by lifestyle habits, budget, and department.",
+      accent: "from-emerald-900/25 to-transparent",
+    },
+    {
+      id: 3,
+      image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&q=80&w=1400",
+      badge: "🔒 Safety First",
+      heading: (
+        <>
+          Student-Verified <br />
+          <span className="bg-linear-to-r from-amber-400 to-orange-300 bg-clip-text text-transparent">
+            Safety Ratings
+          </span>
+        </>
+      ),
+      sub: "Every listing is rated by real LASU students on water, power, security, and location.",
+      accent: "from-orange-900/20 to-transparent",
+    },
+  ];
+
+  const [heroSlide, setHeroSlide] = useState(0);
+  const heroTimerRef = useRef(null);
+
+  const startHeroTimer = () => {
+    heroTimerRef.current = setInterval(() => {
+      setHeroSlide((prev) => (prev + 1) % HERO_SLIDES.length);
+    }, 5000);
+  };
+
+  useEffect(() => {
+    startHeroTimer();
+    return () => clearInterval(heroTimerRef.current);
+  }, []);
+
+  const goToSlide = (idx) => {
+    clearInterval(heroTimerRef.current);
+    setHeroSlide(idx);
+    startHeroTimer();
+  };
+
+  const prevSlide = () => goToSlide((heroSlide - 1 + HERO_SLIDES.length) % HERO_SLIDES.length);
+  const nextSlide = () => goToSlide((heroSlide + 1) % HERO_SLIDES.length);
+
 
   // Detail Modal State
   const [selectedProperty, setSelectedProperty] = useState(null);
@@ -270,39 +343,55 @@ export default function HomeListingPage() {
       {/* Navigation Header */}
       <Header />
 
-      {/* Hero Banner Section */}
-      <section className="relative w-full min-h-[480px] sm:h-[460px] flex items-center justify-center overflow-hidden px-4 py-10 sm:py-0">
-        <div className="absolute inset-0 bg-slate-950">
-          <Image
-            src="/lasu_housing_hero.png"
-            alt="LASU Student Housing Sunset"
-            fill
-            className="object-cover opacity-45 filter brightness-90 transition-transform duration-10000 hover:scale-105"
-            priority
-          />
-          <div className="absolute inset-0 bg-linear-to-t from-slate-900 via-slate-900/35 to-slate-950/75" />
-          <div className="absolute inset-0 bg-linear-to-r from-purple-900/20 to-transparent" />
-        </div>
+      {/* Hero Carousel Section */}
+      <section className="relative w-full min-h-[500px] sm:h-[500px] flex items-center justify-center overflow-hidden">
+        {/* Slides */}
+        {HERO_SLIDES.map((slide, idx) => (
+          <div
+            key={slide.id}
+            className="absolute inset-0 transition-opacity duration-700 ease-in-out"
+            style={{ opacity: idx === heroSlide ? 1 : 0, zIndex: idx === heroSlide ? 1 : 0 }}
+            aria-hidden={idx !== heroSlide}
+          >
+            <div className="absolute inset-0 bg-slate-950">
+              <Image
+                src={slide.image}
+                alt={`Nestld Hero Slide ${idx + 1}`}
+                fill
+                className="object-cover opacity-45 filter brightness-90"
+                priority={idx === 0}
+              />
+              <div className="absolute inset-0 bg-linear-to-t from-slate-900 via-slate-900/35 to-slate-950/75" />
+              <div className={`absolute inset-0 bg-linear-to-r ${slide.accent}`} />
+            </div>
+          </div>
+        ))}
 
-        <div className="relative max-w-4xl w-full mx-auto text-center flex flex-col items-center gap-6 sm:gap-8">
+        {/* Content — always on top */}
+        <div className="relative z-10 max-w-4xl w-full mx-auto text-center flex flex-col items-center gap-6 sm:gap-8 px-4 py-10 sm:py-0">
           <div className="space-y-3 sm:space-y-4">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/20 border border-purple-400/30 text-purple-200 text-[10px] sm:text-xs font-bold uppercase tracking-wider">
-              <Sparkles className="h-3 w-3 text-amber-400" /> Tailored For Lagos
-              State University Students
+            <span
+              key={heroSlide + "-badge"}
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/20 border border-purple-400/30 text-purple-200 text-[10px] sm:text-xs font-bold uppercase tracking-wider animate-fade-in"
+            >
+              <Sparkles className="h-3 w-3 text-amber-400" />
+              {HERO_SLIDES[heroSlide].badge}
             </span>
-            <h1 className="text-3xl sm:text-5xl md:text-6xl font-extrabold text-white tracking-tight leading-tight drop-shadow-md">
-              Find Your Perfect Home <br />
-              <span className="bg-linear-to-r from-amber-400 to-amber-300 bg-clip-text text-transparent">
-                Near LASU
-              </span>
+            <h1
+              key={heroSlide + "-heading"}
+              className="text-3xl sm:text-5xl md:text-6xl font-extrabold text-white tracking-tight leading-tight drop-shadow-md animate-slide-up"
+            >
+              {HERO_SLIDES[heroSlide].heading}
             </h1>
-            <p className="max-w-xl mx-auto text-sm sm:text-lg text-slate-200/90 font-medium">
-              Verified student housings, hostels, and roommate matching tailored
-              for Lagos State University students.
+            <p
+              key={heroSlide + "-sub"}
+              className="max-w-xl mx-auto text-sm sm:text-lg text-slate-200/90 font-medium animate-fade-in"
+            >
+              {HERO_SLIDES[heroSlide].sub}
             </p>
           </div>
 
-          {/* Airbnb Floating Search Bar */}
+          {/* Floating Search Bar */}
           <div className="w-full max-w-3xl bg-white/95 backdrop-blur-md rounded-2xl md:rounded-full p-2 md:p-3 shadow-2xl shadow-slate-950/30 border border-white/50 flex flex-col md:flex-row items-stretch md:items-center gap-2 md:gap-0 select-none">
             <div className="flex-1 px-4 sm:px-5 py-2 sm:py-2.5 border-b md:border-b-0 md:border-r border-slate-100 flex items-center gap-3">
               <MapPin className="text-purple-600 h-5 w-5 shrink-0" />
@@ -345,6 +434,38 @@ export default function HomeListingPage() {
               <span className="text-xs sm:text-sm font-semibold">Search</span>
             </button>
           </div>
+        </div>
+
+        {/* Prev / Next Arrows */}
+        <button
+          onClick={prevSlide}
+          aria-label="Previous slide"
+          className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white/15 hover:bg-white/30 backdrop-blur-sm border border-white/25 flex items-center justify-center text-white transition-all duration-200 active:scale-90"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
+        </button>
+        <button
+          onClick={nextSlide}
+          aria-label="Next slide"
+          className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white/15 hover:bg-white/30 backdrop-blur-sm border border-white/25 flex items-center justify-center text-white transition-all duration-200 active:scale-90"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
+        </button>
+
+        {/* Dot Indicators */}
+        <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
+          {HERO_SLIDES.map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => goToSlide(idx)}
+              aria-label={`Go to slide ${idx + 1}`}
+              className={`rounded-full transition-all duration-300 ${
+                idx === heroSlide
+                  ? "w-6 h-2 bg-white"
+                  : "w-2 h-2 bg-white/40 hover:bg-white/70"
+              }`}
+            />
+          ))}
         </div>
       </section>
 
