@@ -30,6 +30,7 @@ export default function PropertyDetailsModal({ property, onClose }) {
     requestInspection,
     propertyReviews,
     addPropertyReview,
+    fetchPropertyReviews,
   } = useApp();
 
   // Booking states
@@ -42,6 +43,13 @@ export default function PropertyDetailsModal({ property, onClose }) {
   const [ratingSecurity, setRatingSecurity] = useState(5);
   const [ratingWater, setRatingWater] = useState(5);
   const [ratingPower, setRatingPower] = useState(5);
+
+  // Load reviews from MongoDB on mount/open
+  React.useEffect(() => {
+    if (property?.id) {
+      fetchPropertyReviews(property.id);
+    }
+  }, [property?.id]);
 
   if (!property) return null;
 
