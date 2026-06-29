@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "LASU Accommodate - Lagos State University Student Housing",
+  title: "Nestld - Lagos State University Student Housing",
   description: "Verified student housings, hostels, and roommate matching tailored for Lagos State University (LASU) students.",
 };
 

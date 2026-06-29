@@ -23,9 +23,9 @@ const FAQ_ITEMS = [
   {
     id: "faq-1",
     category: "general",
-    question: "What is LASU Accommodate?",
+    question: "What is Nestld?",
     answer:
-      "LASU Accommodate is a premium student housing portal designed specifically for students of Lagos State University (LASU) searching for off-campus apartments around Ojo, Iyana-Iba, Okokomaiko, Igando, and PPL. We provide verified properties, roommate matching, and secure communication channels.",
+      "Nestld is a premium student housing portal designed specifically for students of Lagos State University (LASU) searching for off-campus apartments around Ojo, Iyana-Iba, Okokomaiko, Igando, and PPL. We provide verified properties, roommate matching, and secure communication channels.",
   },
   {
     id: "faq-2",
@@ -60,12 +60,12 @@ const FAQ_ITEMS = [
     category: "safety",
     question: "How do I protect myself from rental scams?",
     answer:
-      "Do NOT pay any agent fee, inspection fee, or rent upfront before physically inspecting the property. Ensure you verify the agent's identity and confirm the hostel's state. LASU Accommodate prompts safety warnings in all agent chats. If you notice a suspicious listing, use the support hotlines or form below to report it instantly.",
+      "Do NOT pay any agent fee, inspection fee, or rent upfront before physically inspecting the property. Ensure you verify the agent's identity and confirm the hostel's state. Nestld prompts safety warnings in all agent chats. If you notice a suspicious listing, use the support hotlines or form below to report it instantly.",
   },
   {
     id: "faq-7",
     category: "general",
-    question: "Is LASU Accommodate free for students?",
+    question: "Is Nestld free for students?",
     answer:
       "Yes! Searching for properties, swiping to match with flatmates, and messaging are completely free for all verified Lagos State University students. Our goal is to ensure housing security near campus.",
   },

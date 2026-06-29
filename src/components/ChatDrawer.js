@@ -152,7 +152,7 @@ export default function ChatDrawer() {
 
             {/* Inbox Footer */}
             <div className="p-4 bg-slate-50 border-t border-slate-100 text-center text-[10px] text-slate-405 font-bold mb-16 md:mb-0">
-              ⚡ LASU Accommodate Student Messaging Hub
+              ⚡ Nestld Student Messaging Hub
             </div>
           </>
         ) : (

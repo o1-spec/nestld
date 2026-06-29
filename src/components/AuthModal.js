@@ -116,7 +116,7 @@ export default function AuthModal() {
         {/* Modal Top Banner */}
         <div className="bg-purple-650 p-6 text-white shrink-0">
           <Compass className="h-8 w-8 mb-2 animate-bounce" />
-          <h3 className="text-2xl font-black">LASU Accommodate</h3>
+          <h3 className="text-2xl font-black">Nestld</h3>
           <p className="text-xs text-purple-200 font-semibold mt-1">
             Hostels, flatsharing, and roommate matching around Ojo.
           </p>

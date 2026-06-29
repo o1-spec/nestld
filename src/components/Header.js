@@ -70,7 +70,7 @@ export default function Header() {
           </div>
           <div className="text-left shrink-0">
             <span className="text-lg sm:text-xl font-extrabold tracking-tight bg-linear-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent whitespace-nowrap">
-              LASU Accommodate
+              Nestld
             </span>
             <span className="hidden sm:block text-[10px] uppercase font-bold tracking-widest text-amber-500 mt-[-2px] whitespace-nowrap">
               Ojo Student Housing

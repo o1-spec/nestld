@@ -98,7 +98,7 @@ export default function AgentRegisterPage() {
               <div className="absolute inset-0 bg-linear-to-t from-slate-950 via-slate-900/40 to-transparent" />
               <div className="absolute bottom-6 left-6 right-6 text-white space-y-2 max-w-sm text-left">
                 <p className="text-xs sm:text-sm font-semibold italic leading-relaxed">
-                  &ldquo;LASU Accommodate doubled my closing rate in just three
+                  &ldquo;Nestld doubled my closing rate in just three
                   months. The student verification process is a
                   game-changer.&rdquo;
                 </p>
