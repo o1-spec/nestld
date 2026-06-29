@@ -1,26 +1,16 @@
 import { NextResponse } from "next/server";
-import jwt from "jsonwebtoken";
 import { connectDB } from "@/lib/db";
 import Inspection from "@/models/Inspection";
 import Property from "@/models/Property";
 import User from "@/models/User";
-
-const JWT_SECRET = process.env.JWT_SECRET || "fallback_secret";
+import { verifyAuth } from "@/lib/auth";
 
 export async function GET(req) {
   try {
     await connectDB();
-    const authHeader = req.headers.get("authorization");
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return NextResponse.json({ error: "Unauthorized session" }, { status: 401 });
-    }
-
-    const token = authHeader.split(" ")[1];
-    let decoded;
-    try {
-      decoded = jwt.verify(token, JWT_SECRET);
-    } catch (e) {
-      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+    const { decoded, error } = await verifyAuth(req);
+    if (error || !decoded) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     let bookings;
@@ -37,33 +27,22 @@ export async function GET(req) {
       studentName: b.studentName,
       studentPhone: b.studentPhone,
       date: b.date,
-      time: b.time
+      time: b.time,
     }));
 
     return NextResponse.json(formatted, { status: 200 });
   } catch (error) {
     console.error("Get Inspections Error:", error);
-    return NextResponse.json(
-      { error: "Internal server error fetching bookings" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
 export async function POST(req) {
   try {
     await connectDB();
-    const authHeader = req.headers.get("authorization");
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return NextResponse.json({ error: "Unauthorized session" }, { status: 401 });
-    }
-
-    const token = authHeader.split(" ")[1];
-    let decoded;
-    try {
-      decoded = jwt.verify(token, JWT_SECRET);
-    } catch (e) {
-      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+    const { decoded, error } = await verifyAuth(req);
+    if (error || !decoded) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const student = await User.findById(decoded.userId);
@@ -80,7 +59,7 @@ export async function POST(req) {
 
     const property = await Property.findById(propertyId);
     if (!property) {
-      return NextResponse.json({ error: "Property listing not found" }, { status: 404 });
+      return NextResponse.json({ error: "Property not found" }, { status: 404 });
     }
 
     const newBooking = await Inspection.create({
@@ -91,25 +70,20 @@ export async function POST(req) {
       date,
       time,
       studentId: student._id,
-      agentId: property.agentId
+      agentId: property.agentId,
     });
 
-    const formatted = {
+    return NextResponse.json({ success: true, booking: {
       id: newBooking._id,
       propertyId: newBooking.propertyId,
       propertyName: newBooking.propertyName,
       studentName: newBooking.studentName,
       studentPhone: newBooking.studentPhone,
       date: newBooking.date,
-      time: newBooking.time
-    };
-
-    return NextResponse.json({ success: true, booking: formatted }, { status: 201 });
+      time: newBooking.time,
+    }}, { status: 201 });
   } catch (error) {
     console.error("Create Inspection Error:", error);
-    return NextResponse.json(
-      { error: "Internal server error scheduling inspection" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

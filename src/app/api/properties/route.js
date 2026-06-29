@@ -1,10 +1,8 @@
 import { NextResponse } from "next/server";
-import jwt from "jsonwebtoken";
 import { connectDB } from "@/lib/db";
 import Property from "@/models/Property";
 import User from "@/models/User";
-
-const JWT_SECRET = process.env.JWT_SECRET || "fallback_secret";
+import { verifyAuth } from "@/lib/auth";
 
 const INITIAL_SEED_PROPERTIES = [
   {
@@ -17,7 +15,7 @@ const INITIAL_SEED_PROPERTIES = [
     amenities: ["Wifi", "24/7 Power", "Security", "Borehole"],
     verified: true,
     available: "Immediate",
-    description: "Located just a short walk from the LASU main gate, Platinum Heights offers high-speed Wi-Fi, round-the-clock solar backup power, secure gated perimeter, and constant running water. Perfect for students looking for close proximity and a study-friendly atmosphere."
+    description: "Located just a short walk from the LASU main gate, Platinum Heights offers high-speed Wi-Fi, round-the-clock solar backup power, secure gated perimeter, and constant running water."
   },
   {
     title: "Blue Roof Residence Villa",
@@ -29,7 +27,7 @@ const INITIAL_SEED_PROPERTIES = [
     amenities: ["Generator", "Borehole", "Security"],
     verified: true,
     available: "1st July, 2026",
-    description: "Spacious 2-Bedroom flat in a highly secured, quiet neighborhood behind the Igando Health Centre. Features large parking space, clean borehole water, separate prepaid meters, and 24/7 security patrol. Ideal for student groups seeking to share costs."
+    description: "Spacious 2-Bedroom flat in a highly secured, quiet neighborhood behind the Igando Health Centre."
   },
   {
     title: "Legacy Student Suites",
@@ -41,7 +39,7 @@ const INITIAL_SEED_PROPERTIES = [
     amenities: ["Wifi", "Security", "Borehole"],
     verified: true,
     available: "Immediate",
-    description: "Modern, tiled single self-contained apartments along the main Ojo-Alaba road. Boasts high natural ventilation, reliable water pump, security fencing, and quick transit access straight to the campus gate."
+    description: "Modern, tiled single self-contained apartments along the main Ojo-Alaba road."
   }
 ];
 
@@ -53,22 +51,23 @@ export async function GET(req) {
     if (count === 0) {
       let agent = await User.findOne({ role: "agent" });
       if (!agent) {
+        const bcrypt = await import("bcryptjs");
+        const hashed = await bcrypt.hash("Agent1234!", 10);
         agent = await User.create({
           name: "Mrs. Ngozi Alao",
-          email: "ngozi@realty.com",
-          password: "placeholder_hashed_password",
+          email: "ngozi@nestld.com",
+          password: hashed,
           role: "agent",
           agency: "Apex Accommodations Ltd",
-          phone: "+234 703 987 6543"
+          phone: "+234 703 987 6543",
         });
       }
-      
       const seedList = INITIAL_SEED_PROPERTIES.map(p => ({
         ...p,
         agentId: agent._id,
         agentName: agent.name,
         agentPhone: agent.phone,
-        agentAgency: agent.agency
+        agentAgency: agent.agency,
       }));
       await Property.insertMany(seedList);
     }
@@ -79,24 +78,19 @@ export async function GET(req) {
     const maxPrice = Number(searchParams.get("maxPrice")) || 10000000;
     const types = searchParams.get("types") ? searchParams.get("types").split(",") : [];
 
-    const query = {
-      price: { $gte: minPrice, $lte: maxPrice }
-    };
-
+    const query = { price: { $gte: minPrice, $lte: maxPrice } };
     if (search) {
       query.$or = [
         { title: { $regex: search, $options: "i" } },
         { location: { $regex: search, $options: "i" } },
-        { description: { $regex: search, $options: "i" } }
+        { description: { $regex: search, $options: "i" } },
       ];
     }
-
     if (types.length > 0) {
       query.type = { $in: types };
     }
 
     const properties = await Property.find(query).sort({ createdAt: -1 });
-
     const formatted = properties.map(p => ({
       id: p._id,
       title: p.title,
@@ -113,38 +107,27 @@ export async function GET(req) {
         name: p.agentName || "Independent Agent",
         phone: p.agentPhone || "+234 800 000 0000",
         agency: p.agentAgency || "Independent Agency",
-        avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200"
-      }
+        avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200",
+      },
     }));
 
     return NextResponse.json(formatted, { status: 200 });
   } catch (error) {
     console.error("Get Properties Error:", error);
-    return NextResponse.json(
-      { error: "Internal server error fetching properties" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
 export async function POST(req) {
   try {
     await connectDB();
-    const authHeader = req.headers.get("authorization");
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return NextResponse.json({ error: "Unauthorized session" }, { status: 401 });
-    }
-
-    const token = authHeader.split(" ")[1];
-    let decoded;
-    try {
-      decoded = jwt.verify(token, JWT_SECRET);
-    } catch (e) {
-      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+    const { decoded, error } = await verifyAuth(req);
+    if (error || !decoded) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     if (decoded.role !== "agent") {
-      return NextResponse.json({ error: "Only verified housing agents can post properties" }, { status: 403 });
+      return NextResponse.json({ error: "Only agents can post properties" }, { status: 403 });
     }
 
     const agent = await User.findById(decoded.userId);
@@ -155,7 +138,7 @@ export async function POST(req) {
     const body = await req.json();
     const { title, price, location, distance, type, image, description, amenities, available } = body;
 
-    if (!title || !price || !location || !distance || !type || !image || !description || !available) {
+    if (!title || !price || !location || !type || !image || !description || !available) {
       return NextResponse.json({ error: "Required fields are missing" }, { status: 400 });
     }
 
@@ -163,7 +146,7 @@ export async function POST(req) {
       title,
       price: Number(price),
       location,
-      distance,
+      distance: distance || "Distance not specified",
       type,
       image,
       description,
@@ -172,10 +155,10 @@ export async function POST(req) {
       agentId: agent._id,
       agentName: agent.name,
       agentPhone: agent.phone || "+234 800 000 0000",
-      agentAgency: agent.agency || "Independent Agency"
+      agentAgency: agent.agency || "Independent Agency",
     });
 
-    const formatted = {
+    return NextResponse.json({ success: true, property: {
       id: newProperty._id,
       title: newProperty.title,
       price: newProperty.price,
@@ -191,16 +174,11 @@ export async function POST(req) {
         name: agent.name,
         phone: agent.phone || "+234 800 000 0000",
         agency: agent.agency || "Independent Agency",
-        avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200"
-      }
-    };
-
-    return NextResponse.json({ success: true, property: formatted }, { status: 201 });
+        avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200",
+      },
+    }}, { status: 201 });
   } catch (error) {
     console.error("Create Property Error:", error);
-    return NextResponse.json(
-      { error: "Internal server error creating listing" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

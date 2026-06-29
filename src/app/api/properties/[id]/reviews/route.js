@@ -1,10 +1,8 @@
 import { NextResponse } from "next/server";
-import jwt from "jsonwebtoken";
 import { connectDB } from "@/lib/db";
 import Review from "@/models/Review";
 import User from "@/models/User";
-
-const JWT_SECRET = process.env.JWT_SECRET || "fallback_secret";
+import { verifyAuth } from "@/lib/auth";
 
 export async function GET(req, { params }) {
   try {
@@ -13,11 +11,7 @@ export async function GET(req, { params }) {
 
     const reviews = await Review.find({ propertyId: id }).sort({ createdAt: -1 });
 
-    let securityAvg = 0;
-    let waterAvg = 0;
-    let powerAvg = 0;
-    let locationAvg = 0;
-
+    let securityAvg = 0, waterAvg = 0, powerAvg = 0, locationAvg = 0;
     if (reviews.length > 0) {
       const sum = reviews.reduce(
         (acc, r) => {
@@ -35,32 +29,24 @@ export async function GET(req, { params }) {
       locationAvg = Number((sum.location / reviews.length).toFixed(1));
     }
 
-    const formatted = reviews.map(r => ({
-      id: r._id,
-      studentName: r.studentName,
-      comment: r.comment,
-      rating: r.rating
-    }));
-
-    return NextResponse.json(
-      {
-        propertyId: id,
-        averages: {
-          security: securityAvg || 5.0,
-          water: waterAvg || 5.0,
-          power: powerAvg || 5.0,
-          location: locationAvg || 5.0
-        },
-        reviews: formatted
+    return NextResponse.json({
+      propertyId: id,
+      averages: {
+        security: securityAvg || 5.0,
+        water: waterAvg || 5.0,
+        power: powerAvg || 5.0,
+        location: locationAvg || 5.0,
       },
-      { status: 200 }
-    );
+      reviews: reviews.map(r => ({
+        id: r._id,
+        studentName: r.studentName,
+        comment: r.comment,
+        rating: r.rating,
+      })),
+    }, { status: 200 });
   } catch (error) {
     console.error("Get Reviews Error:", error);
-    return NextResponse.json(
-      { error: "Internal server error fetching safety reviews" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
@@ -69,28 +55,18 @@ export async function POST(req, { params }) {
     await connectDB();
     const { id } = await params;
 
-    const authHeader = req.headers.get("authorization");
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return NextResponse.json({ error: "Unauthorized session" }, { status: 401 });
-    }
-
-    const token = authHeader.split(" ")[1];
-    let decoded;
-    try {
-      decoded = jwt.verify(token, JWT_SECRET);
-    } catch (e) {
-      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+    const { decoded, error } = await verifyAuth(req);
+    if (error || !decoded) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const student = await User.findById(decoded.userId);
     if (!student) {
-      return NextResponse.json({ error: "Student account not found" }, { status: 404 });
+      return NextResponse.json({ error: "Student not found" }, { status: 404 });
     }
 
-    const body = await req.json();
-    const { comment, rating } = body;
-
-    if (!comment || !rating || !rating.security || !rating.water || !rating.power || !rating.location) {
+    const { comment, rating } = await req.json();
+    if (!comment || !rating?.security || !rating?.water || !rating?.power || !rating?.location) {
       return NextResponse.json({ error: "Required fields are missing" }, { status: 400 });
     }
 
@@ -102,23 +78,18 @@ export async function POST(req, { params }) {
         security: Number(rating.security),
         water: Number(rating.water),
         power: Number(rating.power),
-        location: Number(rating.location)
-      }
+        location: Number(rating.location),
+      },
     });
 
-    const formatted = {
+    return NextResponse.json({ success: true, review: {
       id: newReview._id,
       studentName: newReview.studentName,
       comment: newReview.comment,
-      rating: newReview.rating
-    };
-
-    return NextResponse.json({ success: true, review: formatted }, { status: 201 });
+      rating: newReview.rating,
+    }}, { status: 201 });
   } catch (error) {
     console.error("Create Review Error:", error);
-    return NextResponse.json(
-      { error: "Internal server error creating safety review" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

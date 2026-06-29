@@ -33,14 +33,10 @@ export function AppProvider({ children }) {
 
   // 1. Initial Load of Properties and User Session
   useEffect(() => {
-    // Load properties
     fetchProperties();
-
-    // Check existing session
-    const token = typeof window !== "undefined" ? localStorage.getItem("nestld_token") : null;
-    if (token) {
-      fetchSessionUser();
-    }
+    // Always attempt to restore session — the httpOnly cookie is sent automatically.
+    // getAuthHeaders() provides a Bearer fallback if localStorage token also exists.
+    fetchSessionUser();
   }, []);
 
   // Re-fetch user specific assets when currentUser state changes
@@ -204,7 +200,10 @@ export function AppProvider({ children }) {
     setCurrentUser(user);
   };
 
-  const logoutUser = () => {
+  const logoutUser = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch (_) {}
     localStorage.removeItem("nestld_token");
     setCurrentUser(null);
     setActiveChat(null);

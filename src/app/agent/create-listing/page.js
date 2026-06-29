@@ -36,10 +36,8 @@ export default function CreateListingPage() {
     "Walking Distance (5-10 mins)",
   );
   const [listAmenities, setListAmenities] = useState([]);
-  const [listPhotos, setListPhotos] = useState([
-    "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&q=80&w=200",
-    "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&q=80&w=200",
-  ]);
+  const [listPhotos, setListPhotos] = useState([]); // Cloudinary secure_urls
+  const [isUploading, setIsUploading] = useState(false);
   const [createListError, setCreateListError] = useState("");
 
   const toggleListAmenity = (amenity) => {
@@ -50,17 +48,31 @@ export default function CreateListingPage() {
     }
   };
 
-  const addMockPhoto = () => {
-    const mockUrls = [
-      "https://images.unsplash.com/photo-1598928506311-c55ded91a20c?auto=format&fit=crop&q=80&w=200",
-      "https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&q=80&w=200",
-      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&q=80&w=200",
-    ];
-    const nextPhoto = mockUrls.find((url) => !listPhotos.includes(url));
-    if (nextPhoto) {
-      setListPhotos([...listPhotos, nextPhoto]);
-    } else {
-      alert("Mock Limit: Maximum 5 images allowed for this demo listing.");
+  const handlePhotoUpload = async (e) => {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+    if (listPhotos.length + files.length > 5) {
+      setCreateListError("Maximum 5 images allowed per listing.");
+      return;
+    }
+    setIsUploading(true);
+    setCreateListError("");
+    try {
+      const uploaded = await Promise.all(
+        files.map(async (file) => {
+          const form = new FormData();
+          form.append("file", file);
+          const res = await fetch("/api/upload", { method: "POST", body: form });
+          if (!res.ok) throw new Error("Upload failed");
+          const data = await res.json();
+          return data.url;
+        })
+      );
+      setListPhotos((prev) => [...prev, ...uploaded]);
+    } catch (err) {
+      setCreateListError("Image upload failed. Please try again.");
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -68,17 +80,16 @@ export default function CreateListingPage() {
     setListPhotos(listPhotos.filter((p) => p !== url));
   };
 
-  const handlePublishProperty = (e) => {
+  const handlePublishProperty = async (e) => {
     e.preventDefault();
     setCreateListError("");
 
-    if (
-      !listTitle.trim() ||
-      !listMonthlyRent ||
-      !listStreetAddress.trim() ||
-      !listDescription.trim()
-    ) {
+    if (!listTitle.trim() || !listMonthlyRent || !listStreetAddress.trim() || !listDescription.trim()) {
       setCreateListError("Please fill in all required fields.");
+      return;
+    }
+    if (listPhotos.length === 0) {
+      setCreateListError("Please upload at least one property photo.");
       return;
     }
 
@@ -88,48 +99,28 @@ export default function CreateListingPage() {
       return;
     }
 
-    // Convert Monthly rent to Annual rent (Monthly Rent * 12)
     const annualPrice = rentNum * 12;
+    const propertyType =
+      listType === "Self-Contain" ? "Self-Contained" :
+      listType === "2-Bedroom Flats" ? "2-Bedroom Flats" : "Hostels";
 
-    const newProperty = {
-      id: `prop-${Date.now()}`,
+    const result = await addProperty({
       title: listTitle.trim(),
       price: annualPrice,
       location: `${listStreetAddress.trim()}, Ojo`,
-      distance: `${(Math.random() * 1.5 + 0.3).toFixed(1)} km from LASU Main Gate`,
-      type:
-        listType === "Self-Contain"
-          ? "Self-Contained"
-          : listType === "2-Bedroom Flats"
-            ? "2-Bedroom Flats"
-            : "Hostels",
-      rating: 5.0,
-      reviewsCount: 0,
-      badge: "New Listing",
-      badgeType: "new",
-      image:
-        listPhotos[0] ||
-        "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&q=80&w=800",
-      amenities:
-        listAmenities.length > 0
-          ? listAmenities
-          : ["Wifi", "Borehole", "Security"],
-      verified: true,
+      distance: listProximity,
+      type: propertyType,
+      image: listPhotos[0],
+      amenities: listAmenities.length > 0 ? listAmenities : ["Wifi", "Borehole", "Security"],
       available: "Immediate",
-      agent: {
-        name: currentUser ? currentUser.name : "Prince Olamide",
-        phone: "+234 812 345 6789",
-        agency: currentUser
-          ? currentUser.agency || "Campus Agency"
-          : "Ojo Campus Realty",
-        avatar:
-          "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200",
-      },
       description: listDescription.trim(),
-    };
+    });
 
-    addProperty(newProperty);
-    router.push("/agent/dashboard");
+    if (result?.success) {
+      router.push("/agent/dashboard");
+    } else {
+      setCreateListError(result?.error || "Failed to publish. Please try again.");
+    }
   };
 
   if (!isAgent) {
@@ -421,18 +412,34 @@ export default function CreateListingPage() {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div
-                    onClick={addMockPhoto}
-                    className="sm:col-span-1 border-2 border-dashed border-slate-200 hover:border-purple-400 hover:bg-slate-50/50 rounded-2xl p-6 text-center cursor-pointer flex flex-col justify-center items-center gap-2 h-44 transition"
+                  <label
+                    className={`sm:col-span-1 border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer flex flex-col justify-center items-center gap-2 h-44 transition ${
+                      isUploading
+                        ? "border-purple-400 bg-purple-50/50 cursor-wait"
+                        : "border-slate-200 hover:border-purple-400 hover:bg-slate-50/50"
+                    }`}
                   >
-                    <UploadCloud className="h-8 w-8 text-slate-400" />
-                    <span className="text-xs font-bold text-purple-600">
-                      Click to upload Main Image
-                    </span>
-                    <span className="text-[9px] text-slate-400 font-semibold">
-                      Maximum 10MB per image
-                    </span>
-                  </div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      className="sr-only"
+                      onChange={handlePhotoUpload}
+                      disabled={isUploading || listPhotos.length >= 5}
+                    />
+                    {isUploading ? (
+                      <>
+                        <div className="h-8 w-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+                        <span className="text-xs font-bold text-purple-600">Uploading to Cloudinary...</span>
+                      </>
+                    ) : (
+                      <>
+                        <UploadCloud className="h-8 w-8 text-slate-400" />
+                        <span className="text-xs font-bold text-purple-600">Click to upload photos</span>
+                        <span className="text-[9px] text-slate-400 font-semibold">JPG, PNG, WEBP · Max 10MB each</span>
+                      </>
+                    )}
+                  </label>
 
                   <div className="sm:col-span-2 grid grid-cols-4 gap-3 h-44">
                     {listPhotos.map((url, i) => (
@@ -455,15 +462,12 @@ export default function CreateListingPage() {
                       </div>
                     ))}
 
-                    {Array.from({
-                      length: Math.max(0, 4 - listPhotos.length),
-                    }).map((_, i) => (
+                    {Array.from({ length: Math.max(0, 4 - listPhotos.length) }).map((_, i) => (
                       <div
                         key={i}
-                        onClick={addMockPhoto}
-                        className="rounded-xl border-2 border-dashed border-slate-200 hover:border-purple-300 cursor-pointer flex items-center justify-center relative aspect-square bg-slate-50/50 transition"
+                        className="rounded-xl border-2 border-dashed border-slate-200 flex items-center justify-center relative aspect-square bg-slate-50/50"
                       >
-                        <Upload className="h-4.5 w-4.5 text-slate-350" />
+                        <Upload className="h-4.5 w-4.5 text-slate-300" />
                       </div>
                     ))}
                   </div>
@@ -499,9 +503,10 @@ export default function CreateListingPage() {
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 sm:flex-none px-8 py-3 bg-[#7C3AED] hover:bg-purple-750 active:scale-95 text-white font-bold text-xs rounded-xl shadow-md transition"
+                    disabled={isUploading}
+                    className="flex-1 sm:flex-none px-8 py-3 bg-[#7C3AED] hover:bg-purple-750 active:scale-95 text-white font-bold text-xs rounded-xl shadow-md transition disabled:opacity-60 disabled:cursor-not-allowed"
                   >
-                    Publish Property
+                    {isUploading ? "Uploading..." : "Publish Property"}
                   </button>
                 </div>
               </div>

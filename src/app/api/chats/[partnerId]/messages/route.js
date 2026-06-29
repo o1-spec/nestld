@@ -1,51 +1,38 @@
 import { NextResponse } from "next/server";
-import jwt from "jsonwebtoken";
 import { connectDB } from "@/lib/db";
 import Message from "@/models/Message";
-
-const JWT_SECRET = process.env.JWT_SECRET || "fallback_secret";
+import { verifyAuth } from "@/lib/auth";
 
 export async function GET(req, { params }) {
   try {
     await connectDB();
     const { partnerId } = await params;
 
-    const authHeader = req.headers.get("authorization");
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return NextResponse.json({ error: "Unauthorized session" }, { status: 401 });
+    const { decoded, error } = await verifyAuth(req);
+    if (error || !decoded) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const token = authHeader.split(" ")[1];
-    let decoded;
-    try {
-      decoded = jwt.verify(token, JWT_SECRET);
-    } catch (e) {
-      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
-    }
+    const userId = decoded.userId.toString();
 
     const messages = await Message.find({
       $or: [
-        { senderId: decoded.userId, receiverId: partnerId },
-        { senderId: partnerId, receiverId: decoded.userId },
-        { senderId: "student-user", receiverId: partnerId },
-        { senderId: partnerId, receiverId: "student-user" }
-      ]
+        { senderId: userId, receiverId: partnerId },
+        { senderId: partnerId, receiverId: userId },
+      ],
     }).sort({ createdAt: 1 });
 
     const formatted = messages.map(m => ({
       id: m._id,
       senderId: m.senderId,
       content: m.content,
-      timestamp: m.timestamp
+      timestamp: m.createdAt,
     }));
 
     return NextResponse.json(formatted, { status: 200 });
   } catch (error) {
     console.error("Get Messages Error:", error);
-    return NextResponse.json(
-      { error: "Internal server error fetching message logs" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
@@ -54,43 +41,37 @@ export async function POST(req, { params }) {
     await connectDB();
     const { partnerId } = await params;
 
-    const authHeader = req.headers.get("authorization");
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return NextResponse.json({ error: "Unauthorized session" }, { status: 401 });
+    const { decoded, error } = await verifyAuth(req);
+    if (error || !decoded) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const token = authHeader.split(" ")[1];
-    let decoded;
-    try {
-      decoded = jwt.verify(token, JWT_SECRET);
-    } catch (e) {
-      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
-    }
+    const userId = decoded.userId.toString();
+    const body = await req.json();
+    const { content, senderOverride } = body;
 
-    const { content } = await req.json();
-    if (!content) {
+    if (!content?.trim()) {
       return NextResponse.json({ error: "Content is required" }, { status: 400 });
     }
 
+    // senderOverride lets mock agent replies store under the agent's id
+    const senderId = senderOverride || userId;
+    const receiverId = senderOverride ? userId : partnerId;
+
     const newMsg = await Message.create({
-      senderId: "student-user",
-      receiverId: partnerId,
-      content: content.trim()
+      senderId,
+      receiverId,
+      content: content.trim(),
     });
 
-    const formatted = {
+    return NextResponse.json({
       id: newMsg._id,
       senderId: newMsg.senderId,
       content: newMsg.content,
-      timestamp: newMsg.timestamp
-    };
-
-    return NextResponse.json(formatted, { status: 201 });
+      timestamp: newMsg.createdAt,
+    }, { status: 201 });
   } catch (error) {
     console.error("Send Message Error:", error);
-    return NextResponse.json(
-      { error: "Internal server error sending message" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
