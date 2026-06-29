@@ -1,10 +1,8 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
 import { connectDB } from "@/lib/db";
 import User from "@/models/User";
-
-const JWT_SECRET = process.env.JWT_SECRET || "fallback_secret";
+import { signToken, buildAuthCookie } from "@/lib/auth";
 
 export async function POST(req) {
   try {
@@ -34,11 +32,7 @@ export async function POST(req) {
       );
     }
 
-    const token = jwt.sign(
-      { userId: user._id, role: user.role, email: user.email },
-      JWT_SECRET,
-      { expiresIn: "7d" }
-    );
+    const token = signToken({ userId: user._id, role: user.role, email: user.email });
 
     const userResponse = {
       id: user._id,
@@ -53,10 +47,12 @@ export async function POST(req) {
       habits: user.habits,
     };
 
-    return NextResponse.json(
+    const res = NextResponse.json(
       { success: true, token, user: userResponse },
       { status: 200 }
     );
+    res.headers.set("Set-Cookie", buildAuthCookie(token));
+    return res;
   } catch (error) {
     console.error("Login Error:", error);
     return NextResponse.json(
