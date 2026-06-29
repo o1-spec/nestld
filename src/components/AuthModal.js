@@ -14,6 +14,7 @@ export default function AuthModal() {
     authTab,
     setAuthTab,
     setCurrentUser,
+    loginUser,
   } = useApp();
 
   const [authRole, setAuthRole] = useState("student");
@@ -24,82 +25,120 @@ export default function AuthModal() {
 
   if (!showAuthModal) return null;
 
-  const handleAuthSubmit = (e) => {
+  const handleAuthSubmit = async (e) => {
     e.preventDefault();
     setAuthError("");
 
-    if (authTab === "login") {
-      if (!authEmail.trim() || !authPassword.trim()) {
-        setAuthError("Please fill out all fields.");
-        return;
-      }
+    try {
+      if (authTab === "login") {
+        if (!authEmail.trim() || !authPassword.trim()) {
+          setAuthError("Please fill out all fields.");
+          return;
+        }
 
-      const isOlamide =
-        authEmail.toLowerCase().includes("olamide") ||
-        authEmail.toLowerCase().includes("agent");
-      const mockUser = {
-        name: isOlamide ? "Prince Olamide" : authEmail.split("@")[0],
-        email: authEmail,
-        role: isOlamide ? "agent" : "student",
-      };
+        const res = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: authEmail, password: authPassword }),
+        });
 
-      setCurrentUser(mockUser);
-      setShowAuthModal(false);
+        const data = await res.json();
+        if (!res.ok) {
+          setAuthError(data.error || "Login failed");
+          return;
+        }
 
-      if (mockUser.role === "agent") {
-        router.push("/agent/dashboard");
+        loginUser(data.token, data.user);
+        setShowAuthModal(false);
+
+        if (data.user.role === "agent") {
+          router.push("/agent/dashboard");
+        } else {
+          router.push("/");
+        }
       } else {
+        if (!authName.trim() || !authEmail.trim() || !authPassword.trim()) {
+          setAuthError("Please fill out all fields.");
+          return;
+        }
+
+        const res = await fetch("/api/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: authName,
+            email: authEmail,
+            password: authPassword,
+            role: "student",
+          }),
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          setAuthError(data.error || "Registration failed");
+          return;
+        }
+
+        loginUser(data.token, data.user);
+        setShowAuthModal(false);
         router.push("/");
       }
-    } else {
-      // General Student Registration
-      if (!authName.trim() || !authEmail.trim() || !authPassword.trim()) {
-        setAuthError("Please fill out all fields.");
-        return;
-      }
 
-      const mockUser = {
-        name: authName,
-        email: authEmail,
-        role: "student",
-        department: "Computer Science",
-        year: "100L",
-        budget: "250000",
-        habits: ["Quiet Study", "Early Bird"],
-      };
-
-      setCurrentUser(mockUser);
-      setShowAuthModal(false);
-      router.push("/");
+      setAuthName("");
+      setAuthEmail("");
+      setAuthPassword("");
+    } catch (err) {
+      console.error("Auth error:", err);
+      setAuthError("Network error. Please try again.");
     }
-
-    setAuthName("");
-    setAuthEmail("");
-    setAuthPassword("");
   };
 
-  const quickLogin = (role) => {
+  const quickLogin = async (role) => {
     setAuthError("");
-    if (role === "student") {
-      setCurrentUser({
-        name: "Tobi Daniel",
-        email: "tobi.student@lasu.edu.ng",
-        role: "student",
-        department: "Computer Science",
-        year: "300L",
-        budget: "250000",
-        habits: ["Quiet Study", "Early Bird"],
+    const email = role === "student" ? "tobi.student@lasu.edu.ng" : "olamide.agent@gmail.com";
+    const password = "Password123";
+    const name = role === "student" ? "Tobi Daniel" : "Prince Olamide";
+
+    try {
+      let res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
       });
-      router.push("/");
-    } else {
-      setCurrentUser({
-        name: "Prince Olamide",
-        email: "olamide.agent@gmail.com",
-        role: "agent",
-      });
-      router.push("/agent/dashboard");
+
+      let data = await res.json();
+
+      if (!res.ok) {
+        res = await fetch("/api/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name,
+            email,
+            password,
+            role,
+            agency: role === "agent" ? "Ojo Campus Realty" : undefined,
+            phone: role === "agent" ? "+234 812 345 6789" : undefined,
+          }),
+        });
+        data = await res.json();
+      }
+
+      if (res.ok) {
+        loginUser(data.token, data.user);
+        setShowAuthModal(false);
+        if (data.user.role === "agent") {
+          router.push("/agent/dashboard");
+        } else {
+          router.push("/");
+        }
+      } else {
+        setAuthError(data.error || "Quick login failed");
+      }
+    } catch (err) {
+      console.error("Quick login error:", err);
+      setAuthError("Network error during quick login.");
     }
-    setShowAuthModal(false);
   };
 
   return (

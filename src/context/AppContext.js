@@ -1,155 +1,15 @@
 "use client";
 
-import React, { createContext, useState, useContext } from "react";
+import React, { createContext, useState, useContext, useEffect } from "react";
 
 const AppContext = createContext();
-
-// Mock Initial Properties
-const INITIAL_PROPERTIES = [
-  {
-    id: "prop-1",
-    title: "Platinum Heights Student Hostel",
-    price: 250000,
-    location: "Iyana-Iba, Main Gate Area",
-    distance: "0.4 km from LASU Main Gate",
-    type: "Hostels",
-    rating: 4.8,
-    reviewsCount: 24,
-    badge: "New Listing",
-    badgeType: "new",
-    image: "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&q=80&w=800",
-    amenities: ["Wifi", "24/7 Power", "Security", "Borehole"],
-    verified: true,
-    available: "Immediate",
-    agent: {
-      name: "Prince Olamide",
-      phone: "+234 812 345 6789",
-      agency: "Ojo Campus Realty",
-      avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200"
-    },
-    description: "Located just a short walk from the LASU main gate, Platinum Heights offers high-speed Wi-Fi, round-the-clock solar backup power, secure gated perimeter, and constant running water. Perfect for students looking for close proximity and a study-friendly atmosphere."
-  },
-  {
-    id: "prop-2",
-    title: "Blue Roof Residence Villa",
-    price: 450000,
-    location: "Igando, Behind Health Centre",
-    distance: "2.1 km from LASU Main Gate",
-    type: "2-Bedroom Flats",
-    rating: 4.9,
-    reviewsCount: 18,
-    badge: "Top Rated",
-    badgeType: "warning",
-    image: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&q=80&w=800",
-    amenities: ["Generator", "Borehole", "Security"],
-    verified: true,
-    available: "1st July, 2026",
-    agent: {
-      name: "Mrs. Ngozi Alao",
-      phone: "+234 703 987 6543",
-      agency: "Apex Accommodations Ltd",
-      avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200"
-    },
-    description: "Spacious 2-Bedroom flat in a highly secured, quiet neighborhood behind the Igando Health Centre. Features large parking space, clean borehole water, separate prepaid meters, and 24/7 security patrol. Ideal for student groups seeking to share costs."
-  },
-  {
-    id: "prop-3",
-    title: "Legacy Student Suites",
-    price: 320000,
-    location: "Ojo-Alaba Road",
-    distance: "1.5 km from LASU Main Gate",
-    type: "Self-Contained",
-    rating: 4.6,
-    reviewsCount: 15,
-    badge: "Popular",
-    badgeType: "success",
-    image: "https://images.unsplash.com/photo-1598928506311-c55ded91a20c?auto=format&fit=crop&q=80&w=800",
-    amenities: ["Wifi", "Security", "Borehole"],
-    verified: true,
-    available: "Immediate",
-    agent: {
-      name: "Hon. Segun Gbadamosi",
-      phone: "+234 809 555 1234",
-      agency: "Alaba Properties Group",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200"
-    },
-    description: "Modern, tiled single self-contained apartments along the main Ojo-Alaba road. Boasts high natural ventilation, reliable water pump, security fencing, and quick transit access straight to the campus gate."
-  },
-  {
-    id: "prop-4",
-    title: "Unity Palms Shared Hostels",
-    price: 180000,
-    location: "PPL Axis, Ojo",
-    distance: "1.8 km from LASU Main Gate",
-    type: "Hostels",
-    rating: 4.3,
-    reviewsCount: 12,
-    badgeType: "",
-    image: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&q=80&w=800",
-    amenities: ["Borehole", "Security"],
-    verified: false,
-    available: "Immediate",
-    agent: {
-      name: "Prince Olamide",
-      phone: "+234 812 345 6789",
-      agency: "Ojo Campus Realty",
-      avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200"
-    },
-    description: "Affordable shared hostel accommodations in the bustling PPL student community. A highly vibrant area filled with student retail shops, restaurants, and study circles. Fenced property with shared clean borehole water access."
-  },
-  {
-    id: "prop-5",
-    title: "Vantage Point Premium Suites",
-    price: 380000,
-    location: "Okokomaiko, Ojo",
-    distance: "1.2 km from LASU Main Gate",
-    type: "Self-Contained",
-    rating: 4.7,
-    reviewsCount: 20,
-    badge: "Verified Agent",
-    badgeType: "success",
-    image: "https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&q=80&w=800",
-    amenities: ["Wifi", "Security", "Borehole"],
-    verified: true,
-    available: "Immediate",
-    agent: {
-      name: "Mrs. Ngozi Alao",
-      phone: "+234 703 987 6543",
-      agency: "Apex Accommodations Ltd",
-      avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200"
-    },
-    description: "Sleek and newly built self-contain apartment located in Okokomaiko. Serviced with premium water pumping, 24-hour security guards, fully tiled interiors, built-in wardrobes, and pre-installed high-speed Wi-Fi."
-  },
-  {
-    id: "prop-6",
-    title: "Apex Heights 2-Bedroom Flat",
-    price: 550000,
-    location: "LASU Road, Iba",
-    distance: "0.9 km from LASU Main Gate",
-    type: "2-Bedroom Flats",
-    rating: 4.9,
-    reviewsCount: 31,
-    badge: "Trending",
-    badgeType: "danger",
-    image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&q=80&w=800",
-    amenities: ["Wifi", "Generator", "Security", "Borehole"],
-    verified: true,
-    available: "August 2026",
-    agent: {
-      name: "Hon. Segun Gbadamosi",
-      phone: "+234 809 555 1234",
-      agency: "Alaba Properties Group",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200"
-    },
-    description: "Ultimate luxury flat on LASU road. Equipped with a central backup generator, gated environment, clean running water, and stylish kitchen cabinets. Perfect for up to 4 students planning to rent together."
-  }
-];
 
 export function AppProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authTab, setAuthTab] = useState("login");
-  const [properties, setProperties] = useState(INITIAL_PROPERTIES);
+  
+  const [properties, setProperties] = useState([]);
   const [favorites, setFavorites] = useState(new Set());
   const [chatMessages, setChatMessages] = useState({});
   const [activeChat, setActiveChat] = useState(null);
@@ -158,114 +18,413 @@ export function AppProvider({ children }) {
   const [showMatchCelebration, setShowMatchCelebration] = useState(null);
   const [showInbox, setShowInbox] = useState(false);
 
-  // Advanced feature states
-  const [inspectionBookings, setInspectionBookings] = useState([
-    {
-      id: "booking-1",
-      propertyId: "prop-1",
-      propertyName: "Platinum Heights Student Hostel",
-      studentName: "Tobi Daniel",
-      studentPhone: "+234 809 123 4567",
-      date: "2026-07-02",
-      time: "12:00 PM"
+  const [inspectionBookings, setInspectionBookings] = useState([]);
+  const [propertyReviews, setPropertyReviews] = useState({});
+  const [roommatesDeck, setRoommatesDeck] = useState([]);
+
+  // Auth Header Helper
+  const getAuthHeaders = () => {
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("nestld_token");
+      return token ? { "Authorization": `Bearer ${token}` } : {};
     }
-  ]);
+    return {};
+  };
 
-  const [propertyReviews, setPropertyReviews] = useState({
-    "prop-1": [
-      {
-        id: "rev-1",
-        studentName: "Femi Onadokun",
-        comment: "Excellent hostel! Power is stable, and the borehole water is very clean.",
-        rating: { security: 5, water: 4, power: 4, location: 5 }
+  // 1. Initial Load of Properties and User Session
+  useEffect(() => {
+    // Load properties
+    fetchProperties();
+
+    // Check existing session
+    const token = typeof window !== "undefined" ? localStorage.getItem("nestld_token") : null;
+    if (token) {
+      fetchSessionUser();
+    }
+  }, []);
+
+  // Re-fetch user specific assets when currentUser state changes
+  useEffect(() => {
+    if (currentUser) {
+      fetchFavorites();
+      fetchInspections();
+      fetchChatsInbox();
+      if (currentUser.role === "student") {
+        fetchRoommatesDeck();
       }
-    ]
-  });
+    } else {
+      setFavorites(new Set());
+      setInspectionBookings([]);
+      setRoommatesDeck([]);
+      setChatMessages({});
+    }
+  }, [currentUser]);
 
-  const updateUserProfile = (profileData) => {
-    setCurrentUser((prev) => {
-      if (!prev) return null;
-      return {
-        ...prev,
-        ...profileData
-      };
-    });
+  // Load chat messages when activeChat is toggled
+  useEffect(() => {
+    if (activeChat) {
+      fetchChatMessages(activeChat.name);
+    }
+  }, [activeChat]);
+
+  const fetchProperties = async () => {
+    try {
+      const res = await fetch("/api/properties");
+      if (res.ok) {
+        const data = await res.json();
+        setProperties(data);
+      }
+    } catch (e) {
+      console.error("Failed to fetch properties:", e);
+    }
   };
 
-  const requestInspection = (bookingDetail) => {
-    const newBooking = {
-      id: `booking-${Date.now()}`,
-      ...bookingDetail
-    };
-    setInspectionBookings((prev) => [newBooking, ...prev]);
-  };
-
-  const addPropertyReview = (propertyId, review) => {
-    const newReview = {
-      id: `rev-${Date.now()}`,
-      ...review
-    };
-    setPropertyReviews((prev) => ({
-      ...prev,
-      [propertyId]: [newReview, ...(prev[propertyId] || [])]
-    }));
-  };
-
-  const toggleFavorite = (id) => {
-    setFavorites((prev) => {
-      const updated = new Set(prev);
-      if (updated.has(id)) {
-        updated.delete(id);
+  const fetchSessionUser = async () => {
+    try {
+      const res = await fetch("/api/auth/me", {
+        headers: getAuthHeaders(),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setCurrentUser(data);
       } else {
-        updated.add(id);
+        localStorage.removeItem("nestld_token");
+        setCurrentUser(null);
       }
-      return updated;
-    });
+    } catch (e) {
+      console.error("Session check error:", e);
+    }
   };
 
-  const addProperty = (newProperty) => {
-    setProperties((prev) => [newProperty, ...prev]);
-  };
-
-  const deleteProperty = (id) => {
-    setProperties((prev) => prev.filter((p) => p.id !== id));
-  };
-
-  const sendMessage = (partnerId, content) => {
-    const newMessage = {
-      id: `msg-${Date.now()}`,
-      senderId: "student-user",
-      content: content.trim(),
-      timestamp: new Date()
-    };
-
-    setChatMessages((prev) => ({
-      ...prev,
-      [partnerId]: [...(prev[partnerId] || []), newMessage]
-    }));
-
-    // Trigger simulated reply
-    setTimeout(() => {
-      let replyContent = "";
-      if (activeChat?.role?.includes("Agent") || activeChat?.role?.includes("agency") || activeChat?.role?.includes("Properties")) {
-        replyContent = `Thanks for reaching out! Let me check the schedule for ${activeChat.listingTitle || "inspection"}. I can offer inspections on Tuesdays and Thursdays between 10 AM and 3 PM. Does that work?`;
-      } else {
-        replyContent = `Hey! Thanks for swiping right. Yes! I'm really interested in splitting bills around Ojo. What's your current budget limit?`;
+  const fetchFavorites = async () => {
+    try {
+      const res = await fetch("/api/favorites", {
+        headers: getAuthHeaders(),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setFavorites(new Set(data.favorites));
       }
+    } catch (e) {
+      console.error("Failed to fetch favorites:", e);
+    }
+  };
 
-      setChatMessages((prev) => ({
-        ...prev,
-        [partnerId]: [
-          ...(prev[partnerId] || []),
-          {
-            id: `reply-${Date.now()}`,
-            senderId: partnerId,
-            content: replyContent,
-            timestamp: new Date()
+  const fetchInspections = async () => {
+    try {
+      const res = await fetch("/api/inspections", {
+        headers: getAuthHeaders(),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setInspectionBookings(data);
+      }
+    } catch (e) {
+      console.error("Failed to fetch inspections:", e);
+    }
+  };
+
+  const fetchRoommatesDeck = async () => {
+    try {
+      const res = await fetch("/api/roommates/deck", {
+        headers: getAuthHeaders(),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setRoommatesDeck(data);
+      }
+    } catch (e) {
+      console.error("Failed to fetch roommates deck:", e);
+    }
+  };
+
+  const fetchChatsInbox = async () => {
+    try {
+      const res = await fetch("/api/chats", {
+        headers: getAuthHeaders(),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setMatchesList(data);
+      }
+    } catch (e) {
+      console.error("Failed to fetch chats inbox:", e);
+    }
+  };
+
+  const fetchChatMessages = async (partnerName) => {
+    try {
+      const res = await fetch(`/api/chats/${partnerName}/messages`, {
+        headers: getAuthHeaders(),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setChatMessages((prev) => ({
+          ...prev,
+          [partnerName]: data
+        }));
+      }
+    } catch (e) {
+      console.error(`Failed to fetch messages for ${partnerName}:`, e);
+    }
+  };
+
+  const fetchPropertyReviews = async (propertyId) => {
+    try {
+      const res = await fetch(`/api/properties/${propertyId}/reviews`);
+      if (res.ok) {
+        const data = await res.json();
+        setPropertyReviews((prev) => ({
+          ...prev,
+          [propertyId]: data.reviews
+        }));
+        // Dynamically update this specific property's cached score representation
+        setProperties((prevProps) =>
+          prevProps.map((p) =>
+            p.id === propertyId
+              ? {
+                  ...p,
+                  rating: data.averages.security, // or average of the categories
+                  reviewsCount: data.reviews.length
+                }
+              : p
+          )
+        );
+        return data.averages;
+      }
+    } catch (e) {
+      console.error("Failed to fetch property reviews:", e);
+    }
+    return { security: 5.0, water: 5.0, power: 5.0, location: 5.0 };
+  };
+
+  // Auth Operations
+  const loginUser = (token, user) => {
+    localStorage.setItem("nestld_token", token);
+    setCurrentUser(user);
+  };
+
+  const logoutUser = () => {
+    localStorage.removeItem("nestld_token");
+    setCurrentUser(null);
+    setActiveChat(null);
+    setFavorites(new Set());
+    setInspectionBookings([]);
+    setRoommatesDeck([]);
+    setMatchesList([]);
+  };
+
+  const updateUserProfile = async (profileData) => {
+    try {
+      const res = await fetch("/api/user/profile", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          ...getAuthHeaders()
+        },
+        body: JSON.stringify(profileData)
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setCurrentUser(data.user);
+        return { success: true };
+      }
+      return { success: false, error: "Failed to update profile values" };
+    } catch (e) {
+      console.error("Failed to update profile:", e);
+      return { success: false, error: e.message };
+    }
+  };
+
+  // Property Operations
+  const addProperty = async (newProperty) => {
+    try {
+      const res = await fetch("/api/properties", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...getAuthHeaders()
+        },
+        body: JSON.stringify(newProperty)
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setProperties((prev) => [data.property, ...prev]);
+        return { success: true };
+      }
+      const err = await res.json();
+      return { success: false, error: err.error || "Failed to post listing" };
+    } catch (e) {
+      console.error("Failed to post property:", e);
+      return { success: false, error: e.message };
+    }
+  };
+
+  const deleteProperty = async (id) => {
+    try {
+      const res = await fetch(`/api/properties/${id}`, {
+        method: "DELETE",
+        headers: getAuthHeaders()
+      });
+      if (res.ok) {
+        setProperties((prev) => prev.filter((p) => p.id !== id));
+        return { success: true };
+      }
+      return { success: false, error: "Failed to delete listing" };
+    } catch (e) {
+      console.error("Failed to delete property:", e);
+      return { success: false, error: e.message };
+    }
+  };
+
+  const toggleFavorite = async (id) => {
+    try {
+      const res = await fetch("/api/favorites/toggle", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...getAuthHeaders()
+        },
+        body: JSON.stringify({ propertyId: id })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setFavorites((prev) => {
+          const updated = new Set(prev);
+          if (data.isFavorited) {
+            updated.add(id);
+          } else {
+            updated.delete(id);
           }
-        ]
-      }));
-    }, 1500);
+          return updated;
+        });
+      }
+    } catch (e) {
+      console.error("Failed to toggle favorite:", e);
+    }
+  };
+
+  // Booking scheduler
+  const requestInspection = async (bookingDetail) => {
+    try {
+      const res = await fetch("/api/inspections", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...getAuthHeaders()
+        },
+        body: JSON.stringify(bookingDetail)
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setInspectionBookings((prev) => [data.booking, ...prev]);
+        return { success: true };
+      }
+      return { success: false, error: "Failed to request inspection" };
+    } catch (e) {
+      console.error("Failed to schedule inspection:", e);
+      return { success: false, error: e.message };
+    }
+  };
+
+  // Review Operations
+  const addPropertyReview = async (propertyId, review) => {
+    try {
+      const res = await fetch(`/api/properties/${propertyId}/reviews`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...getAuthHeaders()
+        },
+        body: JSON.stringify(review)
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setPropertyReviews((prev) => ({
+          ...prev,
+          [propertyId]: [data.review, ...(prev[propertyId] || [])]
+        }));
+        // Trigger averages calculation re-fetch
+        fetchPropertyReviews(propertyId);
+        return { success: true };
+      }
+      return { success: false, error: "Failed to submit safety review" };
+    } catch (e) {
+      console.error("Failed to submit safety review:", e);
+      return { success: false, error: e.message };
+    }
+  };
+
+  // Chat Operations
+  const sendMessage = async (partnerId, content) => {
+    try {
+      const res = await fetch(`/api/chats/${partnerId}/messages`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...getAuthHeaders()
+        },
+        body: JSON.stringify({ content })
+      });
+      if (res.ok) {
+        const newMsg = await res.json();
+        setChatMessages((prev) => ({
+          ...prev,
+          [partnerId]: [...(prev[partnerId] || []), newMsg]
+        }));
+        
+        // Trigger mock agent automatic reply after 1.5s
+        if (partnerId.includes("Agent") || partnerId.includes("Mrs.") || partnerId.includes("Hon.") || partnerId.includes("Prince")) {
+          setTimeout(async () => {
+            const replyMsg = {
+              senderId: partnerId,
+              receiverId: "student-user",
+              content: `Thanks for reaching out! Let me check the schedule for inspection. I can offer viewings on Tuesdays and Thursdays. Does that work?`
+            };
+            // Append reply locally and save to MongoDB
+            const replyRes = await fetch(`/api/chats/student-user/messages`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                ...getAuthHeaders()
+              },
+              body: JSON.stringify({ content: replyMsg.content })
+            });
+            if (replyRes.ok) {
+              fetchChatMessages(partnerId);
+            }
+          }, 1500);
+        }
+      }
+    } catch (e) {
+      console.error("Failed to send message:", e);
+    }
+  };
+
+  // Roommate Swipe Operations
+  const swipeRoommate = async (targetUserId, action) => {
+    try {
+      const res = await fetch("/api/roommates/swipe", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...getAuthHeaders()
+        },
+        body: JSON.stringify({ targetUserId, action })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.isMatch) {
+          setShowMatchCelebration(data.roommate);
+          fetchChatsInbox();
+        }
+        return { success: true };
+      }
+      return { success: false };
+    } catch (e) {
+      console.error("Failed to swipe roommate:", e);
+      return { success: false };
+    }
   };
 
   return (
@@ -273,6 +432,8 @@ export function AppProvider({ children }) {
       value={{
         currentUser,
         setCurrentUser,
+        loginUser,
+        logoutUser,
         showAuthModal,
         setShowAuthModal,
         authTab,
@@ -300,6 +461,10 @@ export function AppProvider({ children }) {
         setInspectionBookings,
         propertyReviews,
         setPropertyReviews,
+        roommatesDeck,
+        swipeRoommate,
+        fetchRoommatesDeck,
+        fetchPropertyReviews,
         updateUserProfile,
         requestInspection,
         addPropertyReview

@@ -73,42 +73,23 @@ export default function RoommateFinderPage() {
     setShowMatchCelebration,
     setActiveChat,
     setChatMessages,
+    roommatesDeck,
+    swipeRoommate
   } = useApp();
+
+  const activeDeck = roommatesDeck && roommatesDeck.length > 0 ? roommatesDeck : ROOMMATES_DECK;
 
   const [swipeOffset, setSwipeOffset] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const dragStart = useRef({ x: 0, y: 0 });
 
-  const handleSwipe = (direction) => {
-    if (currentSwipeIndex >= ROOMMATES_DECK.length) return;
+  const handleSwipe = async (direction) => {
+    if (currentSwipeIndex >= activeDeck.length) return;
 
-    const mate = ROOMMATES_DECK[currentSwipeIndex];
+    const mate = activeDeck[currentSwipeIndex];
 
     if (direction === "like") {
-      // Simulate 70% chance of a mutual match
-      if (Math.random() > 0.3) {
-        setTimeout(() => {
-          setShowMatchCelebration(mate);
-          setMatchesList((prev) => [...prev, mate]);
-          setChatMessages((prev) => ({
-            ...prev,
-            [mate.id]: [
-              {
-                id: `system-match-${Date.now()}`,
-                senderId: "system",
-                content: `You matched with ${mate.name}!`,
-                timestamp: new Date(),
-              },
-              {
-                id: `mate-msg-${Date.now()}`,
-                senderId: mate.id,
-                content: `Hello! I saw we matched! I'm in ${mate.department} (${mate.yearOfStudy}). Do you want to team up and rent a hostel or check out some properties around Ojo together?`,
-                timestamp: new Date(),
-              },
-            ],
-          }));
-        }, 500);
-      }
+      await swipeRoommate(mate.id, "like");
     }
 
     setSwipeOffset({ x: direction === "like" ? 400 : -400, y: 0 });
@@ -180,7 +161,7 @@ export default function RoommateFinderPage() {
             </div>
 
             <div className="relative w-full max-w-[320px] sm:max-w-[340px] h-[430px] sm:h-[460px] flex items-center justify-center">
-              {currentSwipeIndex < ROOMMATES_DECK.length ? (
+              {currentSwipeIndex < activeDeck.length ? (
                 <div
                   onPointerDown={handlePointerDown}
                   onPointerMove={handlePointerMove}
@@ -195,15 +176,15 @@ export default function RoommateFinderPage() {
                 >
                   <div className="relative flex-1 bg-slate-100 overflow-hidden">
                     <img
-                      src={ROOMMATES_DECK[currentSwipeIndex].avatar}
-                      alt={ROOMMATES_DECK[currentSwipeIndex].name}
+                      src={activeDeck[currentSwipeIndex].avatar}
+                      alt={activeDeck[currentSwipeIndex].name}
                       className="w-full h-full object-cover object-center pointer-events-none"
                     />
                     <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent" />
                     <span className="absolute top-4 left-4 bg-amber-500 text-white font-extrabold px-3 py-1 rounded-full text-[10px] sm:text-xs shadow-md">
                       Budget: ₦
                       {(
-                        ROOMMATES_DECK[currentSwipeIndex].budget / 1000
+                        activeDeck[currentSwipeIndex].budget / 1000
                       ).toFixed(0)}
                       k/yr
                     </span>
@@ -219,26 +200,26 @@ export default function RoommateFinderPage() {
                     )}
                     <div className="absolute bottom-4 left-4 right-4 text-white text-left">
                       <h3 className="font-extrabold text-lg sm:text-xl">
-                        {ROOMMATES_DECK[currentSwipeIndex].name},{" "}
-                        {ROOMMATES_DECK[currentSwipeIndex].age}
+                        {activeDeck[currentSwipeIndex].name},{" "}
+                        {activeDeck[currentSwipeIndex].age || 20}
                       </h3>
                       <p className="text-xs text-slate-300 font-semibold">
-                        {ROOMMATES_DECK[currentSwipeIndex].department} (
-                        {ROOMMATES_DECK[currentSwipeIndex].yearOfStudy})
+                        {activeDeck[currentSwipeIndex].department} (
+                        {activeDeck[currentSwipeIndex].yearOfStudy})
                       </p>
                     </div>
                   </div>
 
                   <div className="p-4 sm:p-5 bg-white text-left space-y-4 border-t border-slate-100 shrink-0">
                     <p className="text-xs text-slate-500 font-medium leading-relaxed italic line-clamp-3">
-                      &ldquo;{ROOMMATES_DECK[currentSwipeIndex].bio}&rdquo;
+                      &ldquo;{activeDeck[currentSwipeIndex].bio}&rdquo;
                     </p>
                     <div className="grid grid-cols-2 gap-3 pt-2 text-[10px] font-extrabold text-slate-555">
                       <div className="flex items-center gap-1.5">
                         <span className="w-1.5 h-1.5 bg-purple-650 rounded-full"></span>
                         <span>
                           Cleanliness:{" "}
-                          {ROOMMATES_DECK[currentSwipeIndex].habits.cleanliness}
+                          {activeDeck[currentSwipeIndex].habits?.cleanliness || activeDeck[currentSwipeIndex].habits?.cleanliness === 0 ? activeDeck[currentSwipeIndex].habits.cleanliness : 5}
                           /5
                         </span>
                       </div>
@@ -246,21 +227,21 @@ export default function RoommateFinderPage() {
                         <span className="w-1.5 h-1.5 bg-purple-650 rounded-full"></span>
                         <span>
                           Sleep:{" "}
-                          {ROOMMATES_DECK[currentSwipeIndex].habits.sleep}
+                          {activeDeck[currentSwipeIndex].habits?.sleep || "Early-bird"}
                         </span>
                       </div>
                       <div className="flex items-center gap-1.5">
                         <span className="w-1.5 h-1.5 bg-purple-650 rounded-full"></span>
                         <span>
                           Noise:{" "}
-                          {ROOMMATES_DECK[currentSwipeIndex].habits.noise}/5
+                          {activeDeck[currentSwipeIndex].habits?.noise || 2}/5
                         </span>
                       </div>
                       <div className="flex items-center gap-1.5">
                         <span className="w-1.5 h-1.5 bg-purple-650 rounded-full"></span>
                         <span>
                           Smoke/Drink:{" "}
-                          {ROOMMATES_DECK[currentSwipeIndex].habits.smoke
+                          {activeDeck[currentSwipeIndex].habits?.smoke
                             ? "Yes"
                             : "No"}
                         </span>
@@ -284,7 +265,7 @@ export default function RoommateFinderPage() {
               )}
             </div>
 
-            {currentSwipeIndex < ROOMMATES_DECK.length && (
+            {currentSwipeIndex < activeDeck.length && (
               <div className="flex items-center gap-6 pt-2">
                 <button
                   onClick={() => handleSwipe("dislike")}

@@ -20,6 +20,7 @@ export default function Header() {
   const {
     currentUser,
     setCurrentUser,
+    logoutUser,
     setShowAuthModal,
     setAuthTab,
     matchesList,
@@ -30,7 +31,7 @@ export default function Header() {
   } = useApp();
 
   const handleLogout = () => {
-    setCurrentUser(null);
+    logoutUser();
     router.push("/");
   };
 
