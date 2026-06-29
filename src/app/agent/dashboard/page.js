@@ -18,7 +18,7 @@ import AuthModal from "@/components/AuthModal";
 
 export default function AgentDashboardPage() {
   const router = useRouter();
-  const { currentUser, properties, deleteProperty, setActiveChat } = useApp();
+  const { currentUser, properties, deleteProperty, setActiveChat, inspectionBookings } = useApp();
 
   // Route security block
   const isAgent = currentUser && currentUser.role === "agent";
@@ -70,13 +70,13 @@ export default function AgentDashboardPage() {
           <div className="flex flex-col sm:flex-row gap-3 w-full max-w-sm pt-2">
             <Link
               href="/agent/register"
-              className="flex-1 bg-[#7C3AED] hover:bg-purple-750 text-white font-bold py-3.5 rounded-xl text-xs shadow-md transition text-center"
+              className="flex-1 bg-[#7C3AED] hover:bg-purple-755 text-white font-bold py-3.5 rounded-xl text-xs shadow-md transition text-center"
             >
               Register as Agent
             </Link>
             <button
               onClick={() => router.push("/")}
-              className="flex-1 border border-slate-205 hover:bg-slate-50 text-slate-700 font-bold py-3.5 rounded-xl text-xs transition"
+              className="flex-1 border border-slate-205 hover:bg-slate-55 text-slate-700 font-bold py-3.5 rounded-xl text-xs transition"
             >
               Browse Student Feed
             </button>
@@ -120,7 +120,7 @@ export default function AgentDashboardPage() {
           {/* Stats Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
             <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center gap-4">
-              <div className="h-12 w-12 bg-purple-50 text-purple-650 rounded-xl flex items-center justify-center">
+              <div className="h-12 w-12 bg-purple-55 text-purple-650 rounded-xl flex items-center justify-center">
                 <Building className="h-6 w-6" />
               </div>
               <div>
@@ -150,7 +150,7 @@ export default function AgentDashboardPage() {
                 <Building className="h-6 w-6" />
               </div>
               <div>
-                <span className="text-2xl font-black text-slate-900">12</span>
+                <span className="text-2xl font-black text-slate-900">{myProperties.length * 4}</span>
                 <span className="block text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">
                   Total Property Views
                 </span>
@@ -206,7 +206,7 @@ export default function AgentDashboardPage() {
                               /yr
                             </span>
                           </div>
-                          <span className="inline-flex items-center gap-1 text-[9px] font-extrabold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+                          <span className="inline-flex items-center gap-1 text-[9px] font-extrabold text-emerald-605 bg-emerald-50 px-2 py-0.5 rounded-full">
                             ✓ Live
                           </span>
                         </div>
@@ -230,49 +230,90 @@ export default function AgentDashboardPage() {
               )}
             </div>
 
-            {/* Inbound Inquiries Column */}
-            <div className="space-y-4">
+            {/* Inbound Inquiries & Inspections Column */}
+            <div className="space-y-6">
               <h2 className="text-lg font-black text-slate-805">
-                Received Inquiries
+                Tenant Engagement
               </h2>
 
-              <div className="bg-white border rounded-2xl p-5 shadow-sm space-y-4">
-                {[
-                  {
-                    name: "Segun Adegoke",
-                    listing: "Platinum Heights",
-                    date: "Today, 10:24 AM",
-                  },
-                  {
-                    name: "Mary Okon",
-                    listing: "Apex Heights Flat",
-                    date: "Yesterday",
-                  },
-                  {
-                    name: "Kolawole Benson",
-                    listing: "Platinum Heights",
-                    date: "2 days ago",
-                  },
-                ].map((inq, i) => (
-                  <div
-                    key={i}
-                    onClick={() => handleOpenStudentChat(inq.name)}
-                    className="p-3 bg-slate-50 hover:bg-purple-50 border border-slate-100 hover:border-purple-100 rounded-xl text-left cursor-pointer transition flex justify-between items-center group"
-                  >
-                    <div>
-                      <h4 className="text-xs font-extrabold text-slate-800">
-                        {inq.name}
-                      </h4>
-                      <p className="text-[10px] text-slate-500 font-semibold mt-0.5">
-                        Interested in {inq.listing}
-                      </p>
-                      <span className="text-[9px] text-slate-400 font-bold block mt-1">
-                        {inq.date}
-                      </span>
-                    </div>
-                    <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-purple-650 group-hover:translate-x-1 transition" />
+              <div className="bg-white border rounded-2xl p-5 shadow-sm space-y-6">
+                
+                {/* Received Inquiries */}
+                <div>
+                  <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest pb-2 border-b">Inquiries Inbox</h3>
+                  <div className="space-y-3 pt-3">
+                    {[
+                      {
+                        name: "Segun Adegoke",
+                        listing: "Platinum Heights",
+                        date: "Today, 10:24 AM",
+                      },
+                      {
+                        name: "Mary Okon",
+                        listing: "Apex Heights Flat",
+                        date: "Yesterday",
+                      },
+                      {
+                        name: "Kolawole Benson",
+                        listing: "Platinum Heights",
+                        date: "2 days ago",
+                      },
+                    ].map((inq, i) => (
+                      <div
+                        key={i}
+                        onClick={() => handleOpenStudentChat(inq.name)}
+                        className="p-3 bg-slate-50 hover:bg-purple-50 border border-slate-100 hover:border-purple-100 rounded-xl text-left cursor-pointer transition flex justify-between items-center group"
+                      >
+                        <div>
+                          <h4 className="text-xs font-extrabold text-slate-800">
+                            {inq.name}
+                          </h4>
+                          <p className="text-[10px] text-slate-500 font-semibold mt-0.5 truncate max-w-[130px]">
+                            Interested in {inq.listing}
+                          </p>
+                          <span className="text-[9px] text-slate-400 font-bold block mt-1">
+                            {inq.date}
+                          </span>
+                        </div>
+                        <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-purple-650 group-hover:translate-x-1 transition" />
+                      </div>
+                    ))}
                   </div>
-                ))}
+                </div>
+
+                {/* Scheduled Inspections */}
+                <div>
+                  <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest pb-2 border-b">Scheduled Inspections</h3>
+                  <div className="space-y-3 pt-3">
+                    {inspectionBookings && inspectionBookings.length > 0 ? (
+                      inspectionBookings.map((booking) => (
+                        <div
+                          key={booking.id}
+                          className="p-3 bg-purple-50/30 border border-purple-100 rounded-xl text-left text-xs font-semibold text-slate-655 space-y-1.5"
+                        >
+                          <div className="flex justify-between items-center">
+                            <span className="font-extrabold text-slate-850 truncate max-w-[120px]">{booking.studentName}</span>
+                            <span className="bg-purple-100 text-purple-700 text-[9px] px-2 py-0.5 rounded font-black uppercase">
+                              Active
+                            </span>
+                          </div>
+                          <p className="text-[10px] text-slate-500 font-semibold truncate">
+                            Listing: {booking.propertyName}
+                          </p>
+                          <div className="flex justify-between items-center text-[10px] text-slate-400 font-bold pt-1.5 border-t border-slate-100/50">
+                            <span>📅 {booking.date}</span>
+                            <span>⏰ {booking.time}</span>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="p-4 text-center border border-dashed rounded-xl text-[11px] text-slate-400 font-semibold">
+                        No inspections booked yet.
+                      </div>
+                    )}
+                  </div>
+                </div>
+
               </div>
             </div>
           </div>

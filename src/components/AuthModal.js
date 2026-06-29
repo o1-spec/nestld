@@ -13,7 +13,7 @@ export default function AuthModal() {
     setShowAuthModal,
     authTab,
     setAuthTab,
-    setCurrentUser
+    setCurrentUser,
   } = useApp();
 
   const [authRole, setAuthRole] = useState("student");
@@ -34,16 +34,18 @@ export default function AuthModal() {
         return;
       }
 
-      const isOlamide = authEmail.toLowerCase().includes("olamide") || authEmail.toLowerCase().includes("agent");
+      const isOlamide =
+        authEmail.toLowerCase().includes("olamide") ||
+        authEmail.toLowerCase().includes("agent");
       const mockUser = {
         name: isOlamide ? "Prince Olamide" : authEmail.split("@")[0],
         email: authEmail,
-        role: isOlamide ? "agent" : "student"
+        role: isOlamide ? "agent" : "student",
       };
 
       setCurrentUser(mockUser);
       setShowAuthModal(false);
-      
+
       if (mockUser.role === "agent") {
         router.push("/agent/dashboard");
       } else {
@@ -59,7 +61,11 @@ export default function AuthModal() {
       const mockUser = {
         name: authName,
         email: authEmail,
-        role: "student"
+        role: "student",
+        department: "Computer Science",
+        year: "100L",
+        budget: "250000",
+        habits: ["Quiet Study", "Early Bird"],
       };
 
       setCurrentUser(mockUser);
@@ -78,14 +84,18 @@ export default function AuthModal() {
       setCurrentUser({
         name: "Tobi Daniel",
         email: "tobi.student@lasu.edu.ng",
-        role: "student"
+        role: "student",
+        department: "Computer Science",
+        year: "300L",
+        budget: "250000",
+        habits: ["Quiet Study", "Early Bird"],
       });
       router.push("/");
     } else {
       setCurrentUser({
         name: "Prince Olamide",
         email: "olamide.agent@gmail.com",
-        role: "agent"
+        role: "agent",
       });
       router.push("/agent/dashboard");
     }
@@ -95,7 +105,6 @@ export default function AuthModal() {
   return (
     <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
       <div className="bg-white rounded-3xl shadow-2xl border border-slate-105 w-full max-w-md overflow-hidden relative animate-scale-up select-none text-left flex flex-col max-h-[95vh]">
-        
         {/* Close Button */}
         <button
           onClick={() => setShowAuthModal(false)}
@@ -105,7 +114,7 @@ export default function AuthModal() {
         </button>
 
         {/* Modal Top Banner */}
-        <div className="bg-purple-650 p-6 text-white flex-shrink-0">
+        <div className="bg-purple-650 p-6 text-white shrink-0">
           <Compass className="h-8 w-8 mb-2 animate-bounce" />
           <h3 className="text-2xl font-black">LASU Accommodate</h3>
           <p className="text-xs text-purple-200 font-semibold mt-1">
@@ -114,9 +123,12 @@ export default function AuthModal() {
         </div>
 
         {/* Modal Navigation Tabs */}
-        <div className="flex border-b border-slate-100 flex-shrink-0">
+        <div className="flex border-b border-slate-100 shrink-0">
           <button
-            onClick={() => { setAuthTab("login"); setAuthError(""); }}
+            onClick={() => {
+              setAuthTab("login");
+              setAuthError("");
+            }}
             className={`flex-1 py-3 text-center text-xs font-bold uppercase tracking-wider transition ${
               authTab === "login"
                 ? "text-purple-650 border-b-2 border-purple-600"
@@ -126,7 +138,10 @@ export default function AuthModal() {
             Sign In
           </button>
           <button
-            onClick={() => { setAuthTab("register"); setAuthError(""); }}
+            onClick={() => {
+              setAuthTab("register");
+              setAuthError("");
+            }}
             className={`flex-1 py-3 text-center text-xs font-bold uppercase tracking-wider transition ${
               authTab === "register"
                 ? "text-purple-650 border-b-2 border-purple-600"
@@ -310,7 +325,6 @@ export default function AuthModal() {
             </div>
           )}
         </div>
-
       </div>
     </div>
   );

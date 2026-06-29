@@ -10,6 +10,7 @@ import {
   User,
   LogOut,
   MessageSquare,
+  Heart
 } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 
@@ -25,6 +26,7 @@ export default function Header() {
     showInbox,
     setShowInbox,
     chatMessages,
+    favorites
   } = useApp();
 
   const handleLogout = () => {
@@ -134,6 +136,25 @@ export default function Header() {
 
         {/* Auth Action Buttons */}
         <div className="flex items-center gap-3">
+          
+          {/* Saved / Favorites Shortcut */}
+          <Link
+            href="/favorites"
+            className={`p-2.5 rounded-full border transition relative ${
+              pathname === "/favorites"
+                ? "bg-purple-55 text-purple-650 border-purple-200"
+                : "border-slate-205 hover:bg-slate-50 text-slate-550 hover:text-slate-900"
+            }`}
+            title="Saved Properties"
+          >
+            <Heart className="h-4.5 w-4.5" />
+            {favorites?.size > 0 && (
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full text-[9px] w-4.5 h-4.5 flex items-center justify-center font-bold">
+                {favorites.size}
+              </span>
+            )}
+          </Link>
+
           {currentUser ? (
             <div className="flex items-center gap-3">
               {/* Inbox Trigger Button */}
@@ -154,12 +175,16 @@ export default function Header() {
                 )}
               </button>
 
-              <div className="hidden sm:flex items-center gap-2 bg-slate-50 border border-slate-100 rounded-xl px-3 py-1.5">
+              <Link
+                href={currentUser.role === "agent" ? "/agent/dashboard" : "/profile"}
+                className="hidden sm:flex items-center gap-2 bg-slate-50 border border-slate-100 rounded-xl px-3 py-1.5 hover:border-purple-300 hover:bg-purple-50/20 transition cursor-pointer"
+                title="My Profile Dashboard"
+              >
                 <User className="h-4 w-4 text-purple-600" />
                 <span className="text-xs font-extrabold text-slate-705 max-w-[120px] truncate">
                   {currentUser.name}
                 </span>
-              </div>
+              </Link>
               <button
                 onClick={handleLogout}
                 className="p-2.5 rounded-full border border-slate-200 hover:bg-red-50 hover:text-red-500 text-slate-550 transition"

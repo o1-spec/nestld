@@ -158,6 +158,59 @@ export function AppProvider({ children }) {
   const [showMatchCelebration, setShowMatchCelebration] = useState(null);
   const [showInbox, setShowInbox] = useState(false);
 
+  // Advanced feature states
+  const [inspectionBookings, setInspectionBookings] = useState([
+    {
+      id: "booking-1",
+      propertyId: "prop-1",
+      propertyName: "Platinum Heights Student Hostel",
+      studentName: "Tobi Daniel",
+      studentPhone: "+234 809 123 4567",
+      date: "2026-07-02",
+      time: "12:00 PM"
+    }
+  ]);
+
+  const [propertyReviews, setPropertyReviews] = useState({
+    "prop-1": [
+      {
+        id: "rev-1",
+        studentName: "Femi Onadokun",
+        comment: "Excellent hostel! Power is stable, and the borehole water is very clean.",
+        rating: { security: 5, water: 4, power: 4, location: 5 }
+      }
+    ]
+  });
+
+  const updateUserProfile = (profileData) => {
+    setCurrentUser((prev) => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        ...profileData
+      };
+    });
+  };
+
+  const requestInspection = (bookingDetail) => {
+    const newBooking = {
+      id: `booking-${Date.now()}`,
+      ...bookingDetail
+    };
+    setInspectionBookings((prev) => [newBooking, ...prev]);
+  };
+
+  const addPropertyReview = (propertyId, review) => {
+    const newReview = {
+      id: `rev-${Date.now()}`,
+      ...review
+    };
+    setPropertyReviews((prev) => ({
+      ...prev,
+      [propertyId]: [newReview, ...(prev[propertyId] || [])]
+    }));
+  };
+
   const toggleFavorite = (id) => {
     setFavorites((prev) => {
       const updated = new Set(prev);
@@ -242,7 +295,14 @@ export function AppProvider({ children }) {
         showMatchCelebration,
         setShowMatchCelebration,
         showInbox,
-        setShowInbox
+        setShowInbox,
+        inspectionBookings,
+        setInspectionBookings,
+        propertyReviews,
+        setPropertyReviews,
+        updateUserProfile,
+        requestInspection,
+        addPropertyReview
       }}
     >
       {children}
