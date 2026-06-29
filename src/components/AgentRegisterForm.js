@@ -5,7 +5,7 @@ import { UploadCloud, Check, ChevronDown, AlertTriangle, Eye, EyeOff } from "luc
 import { useApp } from "@/context/AppContext";
 
 export default function AgentRegisterForm({ onSuccess, onToggleLogin }) {
-  const { setCurrentUser } = useApp();
+  const { setCurrentUser, loginUser } = useApp();
 
   const [agentRegName, setAgentRegName] = useState("");
   const [agentRegPhone, setAgentRegPhone] = useState("");
@@ -19,7 +19,7 @@ export default function AgentRegisterForm({ onSuccess, onToggleLogin }) {
   const [agentAgreeAccurate, setAgentAgreeAccurate] = useState(false);
   const [agentRegError, setAgentRegError] = useState("");
 
-  const handleAgentRegisterSubmit = (e) => {
+  const handleAgentRegisterSubmit = async (e) => {
     e.preventDefault();
     setAgentRegError("");
 
@@ -41,17 +41,35 @@ export default function AgentRegisterForm({ onSuccess, onToggleLogin }) {
       return;
     }
 
-    const registeredAgent = {
-      name: agentRegName.trim(),
-      email: agentRegEmail.trim(),
-      role: "agent",
-      agency: agentRegAgency.trim() || "Independent Agent",
-    };
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: agentRegName.trim(),
+          email: agentRegEmail.trim().toLowerCase(),
+          password: agentRegPassword,
+          role: "agent",
+          agency: agentRegAgency.trim() || "Independent Agent",
+          phone: agentRegPhone.trim(),
+        }),
+      });
 
-    setCurrentUser(registeredAgent);
+      const data = await res.json();
+      if (!res.ok) {
+        setAgentRegError(data.error || "Registration failed. Please try again.");
+        return;
+      }
 
-    if (onSuccess) {
-      onSuccess();
+      // loginUser saves token to localStorage AND sets currentUser state
+      loginUser(data.token, data.user);
+
+      if (onSuccess) {
+        onSuccess();
+      }
+    } catch (err) {
+      console.error("Agent register error:", err);
+      setAgentRegError("Network error. Please check your connection.");
     }
   };
 
