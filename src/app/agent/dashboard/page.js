@@ -15,6 +15,8 @@ import { useApp } from "@/context/AppContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import AuthModal from "@/components/AuthModal";
+import ChatDrawer from "@/components/ChatDrawer";
+
 
 export default function AgentDashboardPage() {
   const router = useRouter();
@@ -56,6 +58,8 @@ export default function AgentDashboardPage() {
     return (
       <div className="min-h-screen bg-[#F8FAFC] text-slate-900 font-sans antialiased flex flex-col selection:bg-purple-100 selection:text-purple-900">
         <Header />
+        <AuthModal />
+        <ChatDrawer />
         <main className="max-w-xl mx-auto px-4 py-20 flex-1 flex flex-col justify-center items-center text-center space-y-6 animate-slide-up select-none">
           <AlertTriangle className="h-16 w-16 text-amber-500 animate-pulse" />
           <div className="space-y-2 text-left sm:text-center">
@@ -321,6 +325,7 @@ export default function AgentDashboardPage() {
       </main>
 
       <AuthModal />
+      <ChatDrawer />
       <Footer />
     </div>
   );

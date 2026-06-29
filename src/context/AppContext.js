@@ -376,19 +376,16 @@ export function AppProvider({ children }) {
         // Trigger mock agent automatic reply after 1.5s
         if (partnerId.includes("Agent") || partnerId.includes("Mrs.") || partnerId.includes("Hon.") || partnerId.includes("Prince")) {
           setTimeout(async () => {
-            const replyMsg = {
-              senderId: partnerId,
-              receiverId: "student-user",
-              content: `Thanks for reaching out! Let me check the schedule for inspection. I can offer viewings on Tuesdays and Thursdays. Does that work?`
-            };
-            // Append reply locally and save to MongoDB
-            const replyRes = await fetch(`/api/chats/student-user/messages`, {
+            const replyContent = `Thanks for reaching out! Let me check the schedule for inspection. I can offer viewings on Tuesdays and Thursdays. Does that work?`;
+            // Post reply as an incoming message from the agent's perspective —
+            // use the real logged-in user id so MongoDB stores it correctly
+            const replyRes = await fetch(`/api/chats/${partnerId}/messages`, {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
                 ...getAuthHeaders()
               },
-              body: JSON.stringify({ content: replyMsg.content })
+              body: JSON.stringify({ content: replyContent, senderOverride: partnerId })
             });
             if (replyRes.ok) {
               fetchChatMessages(partnerId);
