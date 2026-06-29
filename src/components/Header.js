@@ -3,7 +3,14 @@
 import React from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { Compass, Users, Building, User, LogOut, MessageSquare } from "lucide-react";
+import {
+  Compass,
+  Users,
+  Building,
+  User,
+  LogOut,
+  MessageSquare,
+} from "lucide-react";
 import { useApp } from "@/context/AppContext";
 
 export default function Header() {
@@ -17,7 +24,7 @@ export default function Header() {
     matchesList,
     showInbox,
     setShowInbox,
-    chatMessages
+    chatMessages,
   } = useApp();
 
   const handleLogout = () => {
@@ -33,7 +40,9 @@ export default function Header() {
     }
 
     if (currentUser.role !== "agent") {
-      alert("Access Denied: Only registered housing agents are authorized to upload accommodation listings. Students can match with roommates and chat with agents instead.");
+      alert(
+        "Access Denied: Only registered housing agents are authorized to upload accommodation listings. Students can match with roommates and chat with agents instead.",
+      );
       return;
     }
 
@@ -58,7 +67,7 @@ export default function Header() {
             <Compass className="h-5 w-5 animate-pulse" />
           </div>
           <div className="text-left">
-            <span className="text-xl font-extrabold tracking-tight bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent">
+            <span className="text-xl font-extrabold tracking-tight bg-linear-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent">
               LASU Accommodate
             </span>
             <span className="hidden sm:block text-[10px] uppercase font-bold tracking-widest text-amber-500 mt-[-2px]">
@@ -111,8 +120,16 @@ export default function Header() {
             <Building className="h-4.5 w-4.5" />
             Agent Portal
           </button>
-
-          <button onClick={() => alert("LASU Accommodate Support Hotline: 080-LASU-HOSTEL")} className="text-slate-500 hover:text-slate-900">Help</button>
+          <Link
+            href="/help"
+            className={`relative py-2 transition-all ${
+              pathname === "/help"
+                ? "text-purple-650 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-purple-650 after:rounded-full"
+                : "text-slate-505 hover:text-slate-900"
+            }`}
+          >
+            Help
+          </Link>
         </nav>
 
         {/* Auth Action Buttons */}
@@ -153,7 +170,10 @@ export default function Header() {
             </div>
           ) : (
             <button
-              onClick={() => { setAuthTab("login"); setShowAuthModal(true); }}
+              onClick={() => {
+                setAuthTab("login");
+                setShowAuthModal(true);
+              }}
               className="hidden sm:inline-flex items-center justify-center px-5 py-2.5 rounded-xl border border-slate-200 hover:border-slate-350 bg-white hover:bg-slate-55 text-sm font-semibold transition"
             >
               Login

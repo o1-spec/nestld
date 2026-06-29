@@ -13,7 +13,7 @@ export default function ChatDrawer() {
     showInbox,
     setShowInbox,
     matchesList,
-    properties
+    properties,
   } = useApp();
 
   const [activeMessageInput, setActiveMessageInput] = useState("");
@@ -35,41 +35,44 @@ export default function ChatDrawer() {
   };
 
   // Compile Inbox Conversations list
-  const conversationPartners = Object.keys(chatMessages || {}).map((partnerId) => {
-    // Check if matched roommate
-    const matchedMate = matchesList.find((m) => m.id === partnerId);
-    
-    let name = partnerId;
-    let avatar = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=200";
-    let role = "LASU Student";
+  const conversationPartners = Object.keys(chatMessages || {})
+    .map((partnerId) => {
+      // Check if matched roommate
+      const matchedMate = matchesList.find((m) => m.id === partnerId);
 
-    if (matchedMate) {
-      name = matchedMate.name;
-      avatar = matchedMate.avatar;
-      role = `${matchedMate.department} (${matchedMate.yearOfStudy})`;
-    } else {
-      // Find agent
-      const matchedProp = properties.find((p) => p.agent.name === partnerId);
-      if (matchedProp) {
-        name = matchedProp.agent.name;
-        avatar = matchedProp.agent.avatar;
-        role = `Agent at ${matchedProp.agent.agency}`;
+      let name = partnerId;
+      let avatar =
+        "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=200";
+      let role = "LASU Student";
+
+      if (matchedMate) {
+        name = matchedMate.name;
+        avatar = matchedMate.avatar;
+        role = `${matchedMate.department} (${matchedMate.yearOfStudy})`;
+      } else {
+        // Find agent
+        const matchedProp = properties.find((p) => p.agent.name === partnerId);
+        if (matchedProp) {
+          name = matchedProp.agent.name;
+          avatar = matchedProp.agent.avatar;
+          role = `Agent at ${matchedProp.agent.agency}`;
+        }
       }
-    }
 
-    const msgs = chatMessages[partnerId] || [];
-    const lastMsg = msgs[msgs.length - 1];
+      const msgs = chatMessages[partnerId] || [];
+      const lastMsg = msgs[msgs.length - 1];
 
-    return {
-      id: partnerId,
-      name,
-      avatar,
-      role,
-      lastMessage: lastMsg ? lastMsg.content : "No messages yet",
-      timestamp: lastMsg ? lastMsg.timestamp : new Date(),
-      isMe: lastMsg ? lastMsg.senderId === "student-user" : false
-    };
-  }).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      return {
+        id: partnerId,
+        name,
+        avatar,
+        role,
+        lastMessage: lastMsg ? lastMsg.content : "No messages yet",
+        timestamp: lastMsg ? lastMsg.timestamp : new Date(),
+        isMe: lastMsg ? lastMsg.senderId === "student-user" : false,
+      };
+    })
+    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
   const handleConversationClick = (partner) => {
     setActiveChat({
@@ -77,14 +80,15 @@ export default function ChatDrawer() {
       name: partner.name,
       avatar: partner.avatar,
       role: partner.role,
-      listingTitle: partner.role.includes("Agent") ? "Agent Chat" : "Roommate Match"
+      listingTitle: partner.role.includes("Agent")
+        ? "Agent Chat"
+        : "Roommate Match",
     });
   };
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex justify-end">
       <div className="w-full max-w-md bg-white h-full shadow-2xl flex flex-col justify-between animate-slide-left relative border-l border-slate-200 select-none">
-        
         {/* RENDER INBOX CONVERSATIONS LIST (if activeChat is null) */}
         {!activeChat ? (
           <>
@@ -92,7 +96,9 @@ export default function ChatDrawer() {
             <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50 text-left">
               <div className="flex items-center gap-2">
                 <MessageSquare className="h-5 w-5 text-purple-650" />
-                <h3 className="font-extrabold text-slate-805 text-base">Your Inbox</h3>
+                <h3 className="font-extrabold text-slate-805 text-base">
+                  Your Inbox
+                </h3>
               </div>
               <button
                 onClick={() => setShowInbox(false)}
@@ -125,18 +131,20 @@ export default function ChatDrawer() {
                           {partner.role}
                         </p>
                         <p className="text-xs text-slate-500 font-semibold truncate mt-1">
-                          {partner.isMe ? "You: " : ""}{partner.lastMessage}
+                          {partner.isMe ? "You: " : ""}
+                          {partner.lastMessage}
                         </p>
                       </div>
                     </div>
-                    <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-purple-650 group-hover:translate-x-1 transition ml-2 flex-shrink-0" />
+                    <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-purple-650 group-hover:translate-x-1 transition ml-2 shrink-0" />
                   </div>
                 ))
               ) : (
                 <div className="h-full flex flex-col justify-center items-center text-center p-8 space-y-3">
                   <MessageSquare className="h-10 w-10 text-slate-300" />
                   <p className="text-xs text-slate-400 font-bold max-w-[200px]">
-                    Your inbox is empty. Swipe right on roommates or click &quot;Chat Agent&quot; on listings to start conversations!
+                    Your inbox is empty. Swipe right on roommates or click
+                    &quot;Chat Agent&quot; on listings to start conversations!
                   </p>
                 </div>
               )}
@@ -167,8 +175,12 @@ export default function ChatDrawer() {
                   className="w-10 h-10 rounded-full object-cover border border-slate-205"
                 />
                 <div>
-                  <h3 className="font-extrabold text-sm text-slate-800">{activeChat.name}</h3>
-                  <p className="text-[10px] text-slate-550 font-semibold">{activeChat.role}</p>
+                  <h3 className="font-extrabold text-sm text-slate-800">
+                    {activeChat.name}
+                  </h3>
+                  <p className="text-[10px] text-slate-550 font-semibold">
+                    {activeChat.role}
+                  </p>
                 </div>
               </div>
               <button
@@ -185,9 +197,10 @@ export default function ChatDrawer() {
             {/* Message bubbles list */}
             <div className="flex-1 p-4 overflow-y-auto bg-slate-50/40 space-y-4">
               <div className="p-3 bg-amber-50 rounded-xl border border-amber-100 text-[10px] font-bold text-amber-700 text-left">
-                ⚠️ Avoid paying agent fees upfront before physically inspecting student listings around Ojo.
+                ⚠️ Avoid paying agent fees upfront before physically inspecting
+                student listings around Ojo.
               </div>
-              
+
               {chatMessages[activeChat.id] &&
                 chatMessages[activeChat.id].map((msg) => {
                   const isMe = msg.senderId === "student-user";
@@ -202,13 +215,25 @@ export default function ChatDrawer() {
                     );
                   }
                   return (
-                    <div key={msg.id} className={`flex ${isMe ? "justify-end" : "justify-start"} animate-fade-in`}>
-                      <div className={`max-w-[75%] rounded-2xl p-3.5 text-xs font-semibold text-left shadow-sm ${
-                        isMe ? "bg-purple-600 text-white rounded-br-none" : "bg-white text-slate-800 border border-slate-200/80 rounded-bl-none"
-                      }`}>
+                    <div
+                      key={msg.id}
+                      className={`flex ${isMe ? "justify-end" : "justify-start"} animate-fade-in`}
+                    >
+                      <div
+                        className={`max-w-[75%] rounded-2xl p-3.5 text-xs font-semibold text-left shadow-sm ${
+                          isMe
+                            ? "bg-purple-600 text-white rounded-br-none"
+                            : "bg-white text-slate-800 border border-slate-200/80 rounded-bl-none"
+                        }`}
+                      >
                         <p className="leading-relaxed">{msg.content}</p>
-                        <span className={`block text-[8px] mt-1.5 text-right font-semibold ${isMe ? "text-purple-200" : "text-slate-450"}`}>
-                          {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        <span
+                          className={`block text-[8px] mt-1.5 text-right font-semibold ${isMe ? "text-purple-200" : "text-slate-450"}`}
+                        >
+                          {new Date(msg.timestamp).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
                         </span>
                       </div>
                     </div>
@@ -236,7 +261,6 @@ export default function ChatDrawer() {
             </div>
           </>
         )}
-
       </div>
     </div>
   );

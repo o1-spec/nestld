@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- Purple Rounded Background -->
+  <rect width="32" height="32" rx="8" fill="#7C3AED" />
+  
+  <!-- White Compass & Home symbol -->
+  <path 
+    d="M16 6L24 13V24C24 24.5523 23.5523 25 23 25H9C8.44772 25 8 24.5523 8 24V13L16 6Z" 
+    fill="none" 
+    stroke="#FFFFFF" 
+    stroke-width="2" 
+    stroke-linejoin="round" 
+  />
+  
+  <!-- Internal Compass Needle / Pointer -->
+  <path 
+    d="M16 11L18.5 15.5L16 17.5L13.5 15.5L16 11Z" 
+    fill="#F59E0B" 
+    stroke="#F59E0B"
+    stroke-width="1"
+    stroke-linejoin="round"
+  />
+</svg>
