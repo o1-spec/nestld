@@ -66,11 +66,11 @@ export default function Header() {
           <div className="h-10 w-10 bg-purple-600 rounded-xl flex items-center justify-center text-white shadow-md shadow-purple-500/20">
             <Compass className="h-5 w-5 animate-pulse" />
           </div>
-          <div className="text-left">
-            <span className="text-xl font-extrabold tracking-tight bg-linear-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent">
+          <div className="text-left shrink-0">
+            <span className="text-lg sm:text-xl font-extrabold tracking-tight bg-linear-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent whitespace-nowrap">
               LASU Accommodate
             </span>
-            <span className="hidden sm:block text-[10px] uppercase font-bold tracking-widest text-amber-500 mt-[-2px]">
+            <span className="hidden sm:block text-[10px] uppercase font-bold tracking-widest text-amber-500 mt-[-2px] whitespace-nowrap">
               Ojo Student Housing
             </span>
           </div>
@@ -174,16 +174,16 @@ export default function Header() {
                 setAuthTab("login");
                 setShowAuthModal(true);
               }}
-              className="hidden sm:inline-flex items-center justify-center px-5 py-2.5 rounded-xl border border-slate-200 hover:border-slate-350 bg-white hover:bg-slate-55 text-sm font-semibold transition"
+              className="inline-flex items-center justify-center px-4 py-2 rounded-xl border border-slate-200 hover:border-slate-350 bg-white hover:bg-slate-50 text-xs sm:text-sm font-semibold transition"
             >
               Login
             </button>
           )}
 
-          {/* Post Listing Button */}
+          {/* Post Listing Button (Hidden on mobile header) */}
           <button
             onClick={handlePostClick}
-            className="inline-flex items-center justify-center px-4 sm:px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-750 active:scale-95 text-white text-xs sm:text-sm font-semibold shadow-md shadow-purple-600/10 hover:shadow-lg hover:shadow-purple-600/20 transition-all duration-200"
+            className="hidden sm:inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-750 active:scale-95 text-white text-sm font-semibold shadow-md shadow-purple-600/10 hover:shadow-lg hover:shadow-purple-600/20 transition-all duration-200"
           >
             Post Property
           </button>

@@ -18,7 +18,7 @@ import {
   ChevronDown,
   Sparkles,
   Filter,
-  X
+  X,
 } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import Header from "@/components/Header";
@@ -34,7 +34,7 @@ export default function HomeListingPage() {
     toggleFavorite,
     setActiveChat,
     chatMessages,
-    setChatMessages
+    setChatMessages,
   } = useApp();
 
   // Search & Filter State
@@ -78,37 +78,52 @@ export default function HomeListingPage() {
 
   // Filter and Sort properties
   const filteredProperties = useMemo(() => {
-    return properties.filter((prop) => {
-      if (searchLocation && !prop.location.toLowerCase().includes(searchLocation.toLowerCase())) {
-        return false;
-      }
-      if (searchPropertyType && prop.type !== searchPropertyType) {
-        return false;
-      }
-      if (prop.price > priceRange) {
-        return false;
-      }
-      if (selectedTypes.length > 0 && !selectedTypes.includes(prop.type)) {
-        return false;
-      }
-      if (selectedAmenities.length > 0) {
-        const hasAll = selectedAmenities.every((amen) => prop.amenities.includes(amen));
-        if (!hasAll) return false;
-      }
-      return true;
-    }).sort((a, b) => {
-      if (sortBy === "newest") return b.id.localeCompare(a.id);
-      if (sortBy === "price-asc") return a.price - b.price;
-      if (sortBy === "price-desc") return b.price - a.price;
-      if (sortBy === "distance") {
-        const distA = parseFloat(a.distance.split(" ")[0]);
-        const distB = parseFloat(b.distance.split(" ")[0]);
-        return distA - distB;
-      }
-      if (sortBy === "popular") return b.rating - a.rating;
-      return 0;
-    });
-  }, [properties, searchLocation, searchPropertyType, priceRange, selectedTypes, selectedAmenities, sortBy]);
+    return properties
+      .filter((prop) => {
+        if (
+          searchLocation &&
+          !prop.location.toLowerCase().includes(searchLocation.toLowerCase())
+        ) {
+          return false;
+        }
+        if (searchPropertyType && prop.type !== searchPropertyType) {
+          return false;
+        }
+        if (prop.price > priceRange) {
+          return false;
+        }
+        if (selectedTypes.length > 0 && !selectedTypes.includes(prop.type)) {
+          return false;
+        }
+        if (selectedAmenities.length > 0) {
+          const hasAll = selectedAmenities.every((amen) =>
+            prop.amenities.includes(amen),
+          );
+          if (!hasAll) return false;
+        }
+        return true;
+      })
+      .sort((a, b) => {
+        if (sortBy === "newest") return b.id.localeCompare(a.id);
+        if (sortBy === "price-asc") return a.price - b.price;
+        if (sortBy === "price-desc") return b.price - a.price;
+        if (sortBy === "distance") {
+          const distA = parseFloat(a.distance.split(" ")[0]);
+          const distB = parseFloat(b.distance.split(" ")[0]);
+          return distA - distB;
+        }
+        if (sortBy === "popular") return b.rating - a.rating;
+        return 0;
+      });
+  }, [
+    properties,
+    searchLocation,
+    searchPropertyType,
+    priceRange,
+    selectedTypes,
+    selectedAmenities,
+    sortBy,
+  ]);
 
   // Open Chat Agent helper
   const handleOpenAgentChat = (prop, e) => {
@@ -118,7 +133,7 @@ export default function HomeListingPage() {
       name: prop.agent.name,
       avatar: prop.agent.avatar,
       role: `Agent at ${prop.agent.agency}`,
-      listingTitle: prop.title
+      listingTitle: prop.title,
     };
     setActiveChat(chatPartner);
 
@@ -130,9 +145,9 @@ export default function HomeListingPage() {
             id: "agent-greet",
             senderId: chatPartner.id,
             content: `Hi there! I saw you are interested in "${prop.title}" in ${prop.location}. How can I assist you with inspection or booking?`,
-            timestamp: new Date()
-          }
-        ]
+            timestamp: new Date(),
+          },
+        ],
       }));
     }
   };
@@ -144,7 +159,9 @@ export default function HomeListingPage() {
         {/* Price Range */}
         <div className="space-y-3">
           <div className="flex justify-between items-center">
-            <span className="text-xs uppercase font-extrabold text-slate-400 tracking-wider">Price Range (₦)</span>
+            <span className="text-xs uppercase font-extrabold text-slate-400 tracking-wider">
+              Price Range (₦)
+            </span>
             <span className="text-xs font-bold text-purple-650 bg-purple-50 px-2 py-0.5 rounded-lg border border-purple-100">
               Max: ₦{(priceRange / 1000).toFixed(0)}k
             </span>
@@ -166,10 +183,15 @@ export default function HomeListingPage() {
 
         {/* Property Type Checkboxes */}
         <div className="space-y-3">
-          <span className="block text-xs uppercase font-extrabold text-slate-400 tracking-wider">Property Type</span>
+          <span className="block text-xs uppercase font-extrabold text-slate-400 tracking-wider">
+            Property Type
+          </span>
           <div className="space-y-2">
             {["Hostels", "Self-Contained", "2-Bedroom Flats"].map((type) => (
-              <label key={type} className="flex items-center gap-3 cursor-pointer group select-none">
+              <label
+                key={type}
+                className="flex items-center gap-3 cursor-pointer group select-none"
+              >
                 <div className="relative">
                   <input
                     type="checkbox"
@@ -177,12 +199,16 @@ export default function HomeListingPage() {
                     onChange={() => handleTypeCheckbox(type)}
                     className="sr-only"
                   />
-                  <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all ${
-                    selectedTypes.includes(type)
-                      ? "bg-purple-600 border-purple-600 text-white"
-                      : "border-slate-300 group-hover:border-slate-400 bg-white"
-                  }`}>
-                    {selectedTypes.includes(type) && <CheckCircle2 className="h-3.5 w-3.5 stroke-[3] text-white" />}
+                  <div
+                    className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all ${
+                      selectedTypes.includes(type)
+                        ? "bg-purple-600 border-purple-600 text-white"
+                        : "border-slate-300 group-hover:border-slate-400 bg-white"
+                    }`}
+                  >
+                    {selectedTypes.includes(type) && (
+                      <CheckCircle2 className="h-3.5 w-3.5 stroke-3 text-white" />
+                    )}
                   </div>
                 </div>
                 <span className="text-sm font-semibold text-slate-650 group-hover:text-slate-800 transition">
@@ -195,7 +221,9 @@ export default function HomeListingPage() {
 
         {/* Amenities Chip Filters */}
         <div className="space-y-3">
-          <span className="block text-xs uppercase font-extrabold text-slate-400 tracking-wider">Amenities</span>
+          <span className="block text-xs uppercase font-extrabold text-slate-400 tracking-wider">
+            Amenities
+          </span>
           <div className="flex flex-wrap gap-2">
             {["Wifi", "Generator", "Security", "Borehole"].map((amenity) => {
               const isSelected = selectedAmenities.includes(amenity);
@@ -239,12 +267,11 @@ export default function HomeListingPage() {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-slate-900 font-sans antialiased flex flex-col pb-20 md:pb-0 selection:bg-purple-100 selection:text-purple-900">
-      
       {/* Navigation Header */}
       <Header />
 
       {/* Hero Banner Section */}
-      <section className="relative w-full h-[400px] sm:h-[460px] flex items-center justify-center overflow-hidden px-4">
+      <section className="relative w-full min-h-[480px] sm:h-[460px] flex items-center justify-center overflow-hidden px-4 py-10 sm:py-0">
         <div className="absolute inset-0 bg-slate-950">
           <Image
             src="/lasu_housing_hero.png"
@@ -253,30 +280,36 @@ export default function HomeListingPage() {
             className="object-cover opacity-45 filter brightness-90 transition-transform duration-10000 hover:scale-105"
             priority
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/35 to-slate-950/75" />
-          <div className="absolute inset-0 bg-gradient-to-r from-purple-900/20 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-slate-900 via-slate-900/35 to-slate-950/75" />
+          <div className="absolute inset-0 bg-linear-to-r from-purple-900/20 to-transparent" />
         </div>
 
         <div className="relative max-w-4xl w-full mx-auto text-center flex flex-col items-center gap-6 sm:gap-8">
           <div className="space-y-3 sm:space-y-4">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/20 border border-purple-400/30 text-purple-200 text-[10px] sm:text-xs font-bold uppercase tracking-wider">
-              <Sparkles className="h-3 w-3 text-amber-400" /> Tailored For Lagos State University Students
+              <Sparkles className="h-3 w-3 text-amber-400" /> Tailored For Lagos
+              State University Students
             </span>
             <h1 className="text-3xl sm:text-5xl md:text-6xl font-extrabold text-white tracking-tight leading-tight drop-shadow-md">
               Find Your Perfect Home <br />
-              <span className="bg-gradient-to-r from-amber-400 to-amber-300 bg-clip-text text-transparent">Near LASU</span>
+              <span className="bg-linear-to-r from-amber-400 to-amber-300 bg-clip-text text-transparent">
+                Near LASU
+              </span>
             </h1>
             <p className="max-w-xl mx-auto text-sm sm:text-lg text-slate-200/90 font-medium">
-              Verified student housings, hostels, and roommate matching tailored for Lagos State University students.
+              Verified student housings, hostels, and roommate matching tailored
+              for Lagos State University students.
             </p>
           </div>
 
           {/* Airbnb Floating Search Bar */}
           <div className="w-full max-w-3xl bg-white/95 backdrop-blur-md rounded-2xl md:rounded-full p-2 md:p-3 shadow-2xl shadow-slate-950/30 border border-white/50 flex flex-col md:flex-row items-stretch md:items-center gap-2 md:gap-0 select-none">
             <div className="flex-1 px-4 sm:px-5 py-2 sm:py-2.5 border-b md:border-b-0 md:border-r border-slate-100 flex items-center gap-3">
-              <MapPin className="text-purple-600 h-5 w-5 flex-shrink-0" />
+              <MapPin className="text-purple-600 h-5 w-5 shrink-0" />
               <div className="text-left w-full">
-                <label className="block text-[9px] sm:text-[10px] font-extrabold text-slate-400 uppercase tracking-widest leading-none">Location</label>
+                <label className="block text-[9px] sm:text-[10px] font-extrabold text-slate-400 uppercase tracking-widest leading-none">
+                  Location
+                </label>
                 <input
                   type="text"
                   placeholder="Search area (e.g. Ojo, Iyana-Iba...)"
@@ -288,9 +321,11 @@ export default function HomeListingPage() {
             </div>
 
             <div className="flex-1 px-4 sm:px-5 py-2 sm:py-2.5 border-b md:border-b-0 md:border-r border-slate-100 flex items-center gap-3">
-              <Home className="text-purple-600 h-5 w-5 flex-shrink-0" />
+              <Home className="text-purple-600 h-5 w-5 shrink-0" />
               <div className="text-left w-full relative">
-                <label className="block text-[9px] sm:text-[10px] font-extrabold text-slate-400 uppercase tracking-widest leading-none">Property Type</label>
+                <label className="block text-[9px] sm:text-[10px] font-extrabold text-slate-400 uppercase tracking-widest leading-none">
+                  Property Type
+                </label>
                 <select
                   value={searchPropertyType}
                   onChange={(e) => setSearchPropertyType(e.target.value)}
@@ -316,16 +351,22 @@ export default function HomeListingPage() {
       {/* Main Content Area */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex-1 w-full">
         <div className="flex flex-col lg:flex-row gap-6 sm:gap-8 items-start">
-          
           {/* Desktop Filter Sidebar */}
-          <aside className="hidden lg:block w-72 flex-shrink-0 sticky top-24 z-20">
+          <aside className="hidden lg:block w-72 shrink-0 sticky top-24 z-20">
             <div className="bg-white rounded-2xl border border-slate-200/80 shadow-md p-6 space-y-6">
               <div className="flex items-center justify-between pb-4 border-b border-slate-100">
                 <div className="flex items-center gap-2">
                   <SlidersHorizontal className="h-4.5 w-4.5 text-purple-600" />
-                  <h2 className="font-extrabold text-slate-800 text-lg">Filters</h2>
+                  <h2 className="font-extrabold text-slate-800 text-lg">
+                    Filters
+                  </h2>
                 </div>
-                <button onClick={resetFilters} className="text-xs font-semibold text-purple-600 hover:text-purple-800 transition">Reset</button>
+                <button
+                  onClick={resetFilters}
+                  className="text-xs font-semibold text-purple-600 hover:text-purple-800 transition"
+                >
+                  Reset
+                </button>
               </div>
               {renderFiltersContent(false)}
             </div>
@@ -339,24 +380,40 @@ export default function HomeListingPage() {
             >
               <Filter className="h-4 w-4 text-purple-600" />
               Filter Listings
-              {(selectedTypes.length > 0 || selectedAmenities.length > 0 || priceRange < 1000000) && (
+              {(selectedTypes.length > 0 ||
+                selectedAmenities.length > 0 ||
+                priceRange < 1000000) && (
                 <span className="bg-purple-600 text-white rounded-full text-[9px] w-4.5 h-4.5 flex items-center justify-center font-bold">
-                  {selectedTypes.length + selectedAmenities.length + (priceRange < 1000000 ? 1 : 0)}
+                  {selectedTypes.length +
+                    selectedAmenities.length +
+                    (priceRange < 1000000 ? 1 : 0)}
                 </span>
               )}
             </button>
-            <button onClick={resetFilters} className="px-4 py-3.5 border border-slate-200 bg-white rounded-xl text-slate-555 hover:text-slate-800 text-xs font-bold transition active:scale-95">Reset</button>
+            <button
+              onClick={resetFilters}
+              className="px-4 py-3.5 border border-slate-200 bg-white rounded-xl text-slate-555 hover:text-slate-800 text-xs font-bold transition active:scale-95"
+            >
+              Reset
+            </button>
           </div>
 
           {/* Listings grid */}
           <div className="flex-1 w-full space-y-6">
             <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 bg-white p-4 sm:p-5 rounded-xl border border-slate-200/60 shadow-sm text-left">
               <div>
-                <h2 className="text-lg sm:text-xl font-extrabold text-slate-805 font-sans">Featured Properties</h2>
-                <p className="text-xs text-slate-500 font-semibold mt-0.5 font-sans">Found {filteredProperties.length} active property listing{filteredProperties.length !== 1 && "s"} near Ojo</p>
+                <h2 className="text-lg sm:text-xl font-extrabold text-slate-805 font-sans">
+                  Featured Properties
+                </h2>
+                <p className="text-xs text-slate-500 font-semibold mt-0.5 font-sans">
+                  Found {filteredProperties.length} active property listing
+                  {filteredProperties.length !== 1 && "s"} near Ojo
+                </p>
               </div>
               <div className="flex items-center gap-2 self-start sm:self-auto">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Sort by:</span>
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                  Sort by:
+                </span>
                 <div className="relative">
                   <select
                     value={sortBy}
@@ -384,8 +441,13 @@ export default function HomeListingPage() {
                       onClick={() => setSelectedProperty(prop)}
                       className="bg-white rounded-2xl overflow-hidden border border-slate-200/80 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group flex flex-col cursor-pointer"
                     >
-                      <div className="relative aspect-[4/3] w-full overflow-hidden bg-slate-100">
-                        <Image src={prop.image} alt={prop.title} fill className="object-cover transition-transform duration-500 group-hover:scale-105" />
+                      <div className="relative aspect-4/3 w-full overflow-hidden bg-slate-100">
+                        <Image
+                          src={prop.image}
+                          alt={prop.title}
+                          fill
+                          className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
                         {prop.badge && (
                           <span className="absolute top-3 left-3 px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider text-white shadow-sm z-10 bg-purple-600">
                             {prop.badge}
@@ -393,14 +455,20 @@ export default function HomeListingPage() {
                         )}
                         {prop.verified && (
                           <span className="absolute top-3 right-12 bg-white/90 backdrop-blur px-2.5 py-1 rounded-lg flex items-center gap-1 text-[10px] font-bold text-emerald-600 shadow-sm z-10">
-                            <CheckCircle2 className="h-3 w-3 stroke-[3] text-emerald-505" /> Verified
+                            <CheckCircle2 className="h-3 w-3 stroke-3 text-emerald-505" />{" "}
+                            Verified
                           </span>
                         )}
                         <button
-                          onClick={(e) => { e.stopPropagation(); toggleFavorite(prop.id); }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleFavorite(prop.id);
+                          }}
                           className="absolute top-3 right-3 h-8 w-8 bg-white/95 hover:bg-white rounded-full flex items-center justify-center shadow-md z-10"
                         >
-                          <Heart className={`h-4.5 w-4.5 transition-colors ${isFav ? "fill-red-500 text-red-500" : "text-slate-400 hover:text-slate-650"}`} />
+                          <Heart
+                            className={`h-4.5 w-4.5 transition-colors ${isFav ? "fill-red-500 text-red-500" : "text-slate-400 hover:text-slate-650"}`}
+                          />
                         </button>
                       </div>
                       <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between space-y-4 text-left">
@@ -409,31 +477,56 @@ export default function HomeListingPage() {
                             <MapPin className="h-3.5 w-3.5 text-slate-400" />
                             <span className="truncate">{prop.location}</span>
                           </div>
-                          <h3 className="font-extrabold text-slate-805 text-base leading-snug group-hover:text-purple-600 transition line-clamp-1">{prop.title}</h3>
-                          
+                          <h3 className="font-extrabold text-slate-805 text-base leading-snug group-hover:text-purple-600 transition line-clamp-1">
+                            {prop.title}
+                          </h3>
+
                           <div className="grid grid-cols-3 gap-1 pt-1 border-t border-slate-100 text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-wider text-center">
                             <div className="border-r border-slate-100 pr-1">
-                              <span className="block text-[8px] text-slate-350">Distance</span>
-                              <span className="text-slate-705 text-xs font-black lowercase mt-0.5 block">{prop.distance.split(" ")[0]} km</span>
+                              <span className="block text-[8px] text-slate-350">
+                                Distance
+                              </span>
+                              <span className="text-slate-705 text-xs font-black lowercase mt-0.5 block">
+                                {prop.distance.split(" ")[0]} km
+                              </span>
                             </div>
                             <div className="border-r border-slate-100 px-1">
-                              <span className="block text-[8px] text-slate-355">Type</span>
-                              <span className="text-slate-705 text-xs font-black truncate mt-0.5 block">{prop.type.split(" ")[0]}</span>
+                              <span className="block text-[8px] text-slate-355">
+                                Type
+                              </span>
+                              <span className="text-slate-705 text-xs font-black truncate mt-0.5 block">
+                                {prop.type.split(" ")[0]}
+                              </span>
                             </div>
                             <div className="pl-1">
-                              <span className="block text-[8px] text-slate-355">Availability</span>
-                              <span className="text-emerald-600 text-[10px] font-black truncate mt-0.5 block">{prop.available.split(" ")[0]}</span>
+                              <span className="block text-[8px] text-slate-355">
+                                Availability
+                              </span>
+                              <span className="text-emerald-600 text-[10px] font-black truncate mt-0.5 block">
+                                {prop.available.split(" ")[0]}
+                              </span>
                             </div>
                           </div>
                         </div>
 
                         <div className="flex flex-wrap gap-1">
                           {prop.amenities.map((amen) => (
-                            <span key={amen} className="text-[10px] font-bold bg-slate-50 text-slate-500 border border-slate-100 px-2 py-0.5 rounded-full flex items-center gap-1">
-                              {amen === "Wifi" && <Wifi className="h-2.5 w-2.5 text-purple-500" />}
-                              {amen === "Generator" && <Zap className="h-2.5 w-2.5 text-amber-500" />}
-                              {amen === "Security" && <Shield className="h-2.5 w-2.5 text-emerald-555" />}
-                              {amen === "Borehole" && <Droplet className="h-2.5 w-2.5 text-blue-400" />}
+                            <span
+                              key={amen}
+                              className="text-[10px] font-bold bg-slate-50 text-slate-500 border border-slate-100 px-2 py-0.5 rounded-full flex items-center gap-1"
+                            >
+                              {amen === "Wifi" && (
+                                <Wifi className="h-2.5 w-2.5 text-purple-500" />
+                              )}
+                              {amen === "Generator" && (
+                                <Zap className="h-2.5 w-2.5 text-amber-500" />
+                              )}
+                              {amen === "Security" && (
+                                <Shield className="h-2.5 w-2.5 text-emerald-555" />
+                              )}
+                              {amen === "Borehole" && (
+                                <Droplet className="h-2.5 w-2.5 text-blue-400" />
+                              )}
                               {amen}
                             </span>
                           ))}
@@ -441,18 +534,38 @@ export default function HomeListingPage() {
 
                         <div className="flex items-center justify-between pt-3 border-t border-slate-100">
                           <div>
-                            <span className="text-lg sm:text-xl font-black text-slate-900">₦{(prop.price / 1000).toFixed(0)}k</span>
-                            <span className="text-xs font-semibold text-slate-500">/yr</span>
+                            <span className="text-lg sm:text-xl font-black text-slate-900">
+                              ₦{(prop.price / 1000).toFixed(0)}k
+                            </span>
+                            <span className="text-xs font-semibold text-slate-500">
+                              /yr
+                            </span>
                           </div>
                           <div className="flex items-center gap-1">
                             <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-                            <span className="text-xs font-extrabold text-slate-705">{prop.rating}</span>
+                            <span className="text-xs font-extrabold text-slate-705">
+                              {prop.rating}
+                            </span>
                           </div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-2 pt-2">
-                          <button onClick={(e) => { e.stopPropagation(); setSelectedProperty(prop); }} className="w-full bg-[#7C3AED] hover:bg-purple-700 active:scale-[0.98] text-white text-xs font-bold py-2.5 rounded-xl transition shadow-md shadow-purple-550/10">View Details</button>
-                          <button onClick={(e) => handleOpenAgentChat(prop, e)} className="w-full border border-slate-205 hover:border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-bold py-2.5 rounded-xl transition flex items-center justify-center gap-1.5"><MessageSquare className="h-3.5 w-3.5 text-purple-600" />Chat Agent</button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedProperty(prop);
+                            }}
+                            className="w-full bg-[#7C3AED] hover:bg-purple-700 active:scale-[0.98] text-white text-xs font-bold py-2.5 rounded-xl transition shadow-md shadow-purple-550/10"
+                          >
+                            View Details
+                          </button>
+                          <button
+                            onClick={(e) => handleOpenAgentChat(prop, e)}
+                            className="w-full border border-slate-205 hover:border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-bold py-2.5 rounded-xl transition flex items-center justify-center gap-1.5"
+                          >
+                            <MessageSquare className="h-3.5 w-3.5 text-purple-600" />
+                            Chat Agent
+                          </button>
                         </div>
                       </div>
                     </article>
@@ -462,8 +575,15 @@ export default function HomeListingPage() {
             ) : (
               <div className="bg-white rounded-2xl border p-12 text-center max-w-lg mx-auto space-y-4">
                 <SlidersHorizontal className="h-8 w-8 text-purple-500 animate-bounce mx-auto" />
-                <h3 className="text-lg font-extrabold text-slate-805">No matches found</h3>
-                <button onClick={resetFilters} className="px-5 py-2.5 bg-purple-650 text-white rounded-xl text-xs font-bold transition">Clear Filters</button>
+                <h3 className="text-lg font-extrabold text-slate-805">
+                  No matches found
+                </h3>
+                <button
+                  onClick={resetFilters}
+                  className="px-5 py-2.5 bg-purple-650 text-white rounded-xl text-xs font-bold transition"
+                >
+                  Clear Filters
+                </button>
               </div>
             )}
           </div>
@@ -471,19 +591,30 @@ export default function HomeListingPage() {
       </main>
 
       {/* Mobile bottom filters drawer */}
-      <div className={`fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm transition-opacity duration-300 lg:hidden ${
-        showMobileFilters ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-      }`}>
-        <div className={`absolute bottom-0 left-0 right-0 max-h-[80vh] bg-white rounded-t-3xl p-6 overflow-y-auto transition-transform duration-300 transform ${
-          showMobileFilters ? "translate-y-0" : "translate-y-full"
-        }`}>
+      <div
+        className={`fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm transition-opacity duration-300 lg:hidden ${
+          showMobileFilters
+            ? "opacity-100 pointer-events-auto"
+            : "opacity-0 pointer-events-none"
+        }`}
+      >
+        <div
+          className={`absolute bottom-0 left-0 right-0 max-h-[80vh] bg-white rounded-t-3xl p-6 overflow-y-auto transition-transform duration-300 transform ${
+            showMobileFilters ? "translate-y-0" : "translate-y-full"
+          }`}
+        >
           <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-6">
             <div className="flex items-center gap-2">
               <SlidersHorizontal className="h-5 w-5 text-purple-600" />
               <h2 className="font-extrabold text-slate-800 text-lg">Filters</h2>
             </div>
             <div className="flex items-center gap-4">
-              <button onClick={resetFilters} className="text-xs font-bold text-purple-600">Reset</button>
+              <button
+                onClick={resetFilters}
+                className="text-xs font-bold text-purple-600"
+              >
+                Reset
+              </button>
               <button
                 onClick={() => setShowMobileFilters(false)}
                 className="h-8 w-8 bg-slate-100 hover:bg-slate-200 rounded-full flex items-center justify-center text-slate-550 transition active:scale-90"
