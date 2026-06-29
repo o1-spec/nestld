@@ -56,7 +56,7 @@ export default function ProfilePage() {
       setProfileName(currentUser.name || "");
       setProfileEmail(currentUser.email || "");
       setProfileDept(currentUser.department || "Computer Science");
-      setProfileLevel(currentUser.year || "100L");
+      setProfileLevel(currentUser.yearOfStudy || "100L");
       setProfileBudget(currentUser.budget || "250000");
       setSelectedHabits(currentUser.habits || ["Quiet Study", "Early Bird"]);
     }
@@ -138,7 +138,7 @@ export default function ProfilePage() {
     updateUserProfile({
       name: profileName.trim(),
       department: profileDept,
-      year: profileLevel,
+      yearOfStudy: profileLevel,
       budget: profileBudget,
       habits: selectedHabits,
     });

@@ -20,7 +20,7 @@ import ChatDrawer from "@/components/ChatDrawer";
 
 export default function AgentDashboardPage() {
   const router = useRouter();
-  const { currentUser, properties, deleteProperty, setActiveChat, inspectionBookings } = useApp();
+  const { currentUser, properties, deleteProperty, setActiveChat, inspectionBookings, isLoadingInspections, isLoadingProperties } = useApp();
 
   // Route security block
   const isAgent = currentUser && currentUser.role === "agent";
@@ -170,7 +170,19 @@ export default function AgentDashboardPage() {
                 Your Active Listings
               </h2>
 
-              {myProperties.length > 0 ? (
+              {isLoadingProperties ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {[1, 2].map((n) => (
+                    <div key={n} className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm animate-pulse h-[280px] flex flex-col justify-between">
+                      <div className="bg-slate-200 h-44 w-full" />
+                      <div className="p-4 space-y-2 text-left">
+                        <div className="h-3 bg-slate-200 rounded w-2/3" />
+                        <div className="h-2.5 bg-slate-200 rounded w-1/2" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : myProperties.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {myProperties.map((prop) => (
                     <div
@@ -289,7 +301,15 @@ export default function AgentDashboardPage() {
                 <div>
                   <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest pb-2 border-b">Scheduled Inspections</h3>
                   <div className="space-y-3 pt-3">
-                    {inspectionBookings && inspectionBookings.length > 0 ? (
+                    {isLoadingInspections ? (
+                      Array.from({ length: 2 }).map((_, i) => (
+                        <div key={i} className="p-3 bg-slate-50 border border-slate-100 rounded-xl text-left space-y-2 animate-pulse">
+                          <div className="h-3 bg-slate-200 rounded w-1/2" />
+                          <div className="h-2.5 bg-slate-200 rounded w-3/4" />
+                          <div className="h-2.5 bg-slate-200 rounded w-1/3" />
+                        </div>
+                      ))
+                    ) : inspectionBookings && inspectionBookings.length > 0 ? (
                       inspectionBookings.map((booking) => (
                         <div
                           key={booking.id}

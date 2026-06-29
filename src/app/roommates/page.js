@@ -8,61 +8,6 @@ import Footer from "@/components/Footer";
 import AuthModal from "@/components/AuthModal";
 import ChatDrawer from "@/components/ChatDrawer";
 
-const ROOMMATES_DECK = [
-  {
-    id: "mate-1",
-    name: "Adebayo Temitope",
-    age: 21,
-    gender: "Male",
-    department: "Mechanical Engineering",
-    yearOfStudy: "300L",
-    budget: 200000,
-    bio: "Hey there! Looking for a neat roommate to split a self-contained room near Iyana-Iba or LASU Road. I'm highly focused, clean up after myself, and mostly stay up coding or reading. Respectful of private space.",
-    habits: { cleanliness: 5, noise: 2, sleep: "Night-owl", smoke: false },
-    avatar:
-      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=300",
-  },
-  {
-    id: "mate-2",
-    name: "Chioma Nwachukwu",
-    age: 20,
-    gender: "Female",
-    department: "Law Faculty",
-    yearOfStudy: "200L",
-    budget: 250000,
-    bio: "Law student here! Looking for a friendly, respectful female student to share a flat with. I enjoy cooking, music, and quiet study sessions. Very neat and organized.",
-    habits: { cleanliness: 4, noise: 3, sleep: "Early-bird", smoke: false },
-    avatar:
-      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=300",
-  },
-  {
-    id: "mate-3",
-    name: "Olamide Benson",
-    age: 22,
-    gender: "Male",
-    department: "Computer Science",
-    yearOfStudy: "400L",
-    budget: 180000,
-    bio: "Finalist CS student looking for a calm roommate. I spend most of my day at labs or on my laptop. Love peace and quiet. Let's team up to secure an affordable place around PPL axis.",
-    habits: { cleanliness: 4, noise: 1, sleep: "Night-owl", smoke: false },
-    avatar:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=300",
-  },
-  {
-    id: "mate-4",
-    name: "Fatima Bello",
-    age: 18,
-    gender: "Female",
-    department: "Economics",
-    yearOfStudy: "100L",
-    budget: 300000,
-    bio: "Freshman student looking for a roommate. I am outgoing, love making friends, and hosting study groups. I'm looking for a self-contain or flatmate around Main Gate area to share the bills.",
-    habits: { cleanliness: 3, noise: 4, sleep: "Night-owl", smoke: false },
-    avatar:
-      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=300",
-  },
-];
-
 export default function RoommateFinderPage() {
   const {
     matchesList,
@@ -74,10 +19,11 @@ export default function RoommateFinderPage() {
     setActiveChat,
     setChatMessages,
     roommatesDeck,
-    swipeRoommate
+    swipeRoommate,
+    isLoadingRoommates
   } = useApp();
 
-  const activeDeck = roommatesDeck && roommatesDeck.length > 0 ? roommatesDeck : ROOMMATES_DECK;
+  const activeDeck = roommatesDeck || [];
 
   const [swipeOffset, setSwipeOffset] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
@@ -161,7 +107,16 @@ export default function RoommateFinderPage() {
             </div>
 
             <div className="relative w-full max-w-[320px] sm:max-w-[340px] h-[430px] sm:h-[460px] flex items-center justify-center">
-              {currentSwipeIndex < activeDeck.length ? (
+              {isLoadingRoommates ? (
+                <div className="absolute w-full h-full bg-white border border-slate-200/90 rounded-3xl shadow-xl overflow-hidden flex flex-col justify-between animate-pulse select-none">
+                  <div className="relative flex-1 bg-slate-200" />
+                  <div className="p-4 sm:p-5 space-y-3 shrink-0 text-left">
+                    <div className="h-3 bg-slate-200 rounded w-2/3" />
+                    <div className="h-3 bg-slate-200 rounded w-1/2" />
+                    <div className="h-8 bg-slate-200 rounded w-full mt-2" />
+                  </div>
+                </div>
+              ) : currentSwipeIndex < activeDeck.length ? (
                 <div
                   onPointerDown={handlePointerDown}
                   onPointerMove={handlePointerMove}
@@ -295,7 +250,17 @@ export default function RoommateFinderPage() {
             </div>
 
             <div className="flex-1 overflow-y-auto min-h-[200px] md:min-h-[250px] space-y-3">
-              {matchesList.length > 0 ? (
+              {isLoadingRoommates ? (
+                Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="p-3 bg-slate-50/60 border border-slate-100 rounded-2xl flex items-center gap-3 animate-pulse">
+                    <div className="w-10 h-10 rounded-full bg-slate-200" />
+                    <div className="flex-1 space-y-2 text-left">
+                      <div className="h-3 bg-slate-200 rounded w-2/3" />
+                      <div className="h-2 bg-slate-200 rounded w-1/2" />
+                    </div>
+                  </div>
+                ))
+              ) : matchesList.length > 0 ? (
                 matchesList.map((mate) => (
                   <div
                     key={mate.id}

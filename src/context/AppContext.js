@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useState, useContext, useEffect } from "react";
+import LogoutModal from "@/components/LogoutModal";
 
 const AppContext = createContext();
 
@@ -8,6 +9,7 @@ export function AppProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authTab, setAuthTab] = useState("login");
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   
   const [properties, setProperties] = useState([]);
   const [favorites, setFavorites] = useState(new Set());
@@ -21,6 +23,14 @@ export function AppProvider({ children }) {
   const [inspectionBookings, setInspectionBookings] = useState([]);
   const [propertyReviews, setPropertyReviews] = useState({});
   const [roommatesDeck, setRoommatesDeck] = useState([]);
+
+  // Loading States
+  const [isLoadingSession, setIsLoadingSession] = useState(true);
+  const [isLoadingProperties, setIsLoadingProperties] = useState(true);
+  const [isLoadingFavorites, setIsLoadingFavorites] = useState(false);
+  const [isLoadingInspections, setIsLoadingInspections] = useState(false);
+  const [isLoadingRoommates, setIsLoadingRoommates] = useState(false);
+  const [isLoadingChats, setIsLoadingChats] = useState(false);
 
   // Auth Header Helper
   const getAuthHeaders = () => {
@@ -64,6 +74,7 @@ export function AppProvider({ children }) {
   }, [activeChat]);
 
   const fetchProperties = async () => {
+    setIsLoadingProperties(true);
     try {
       const res = await fetch("/api/properties");
       if (res.ok) {
@@ -72,10 +83,13 @@ export function AppProvider({ children }) {
       }
     } catch (e) {
       console.error("Failed to fetch properties:", e);
+    } finally {
+      setIsLoadingProperties(false);
     }
   };
 
   const fetchSessionUser = async () => {
+    setIsLoadingSession(true);
     try {
       const res = await fetch("/api/auth/me", {
         headers: getAuthHeaders(),
@@ -89,10 +103,13 @@ export function AppProvider({ children }) {
       }
     } catch (e) {
       console.error("Session check error:", e);
+    } finally {
+      setIsLoadingSession(false);
     }
   };
 
   const fetchFavorites = async () => {
+    setIsLoadingFavorites(true);
     try {
       const res = await fetch("/api/favorites", {
         headers: getAuthHeaders(),
@@ -103,10 +120,13 @@ export function AppProvider({ children }) {
       }
     } catch (e) {
       console.error("Failed to fetch favorites:", e);
+    } finally {
+      setIsLoadingFavorites(false);
     }
   };
 
   const fetchInspections = async () => {
+    setIsLoadingInspections(true);
     try {
       const res = await fetch("/api/inspections", {
         headers: getAuthHeaders(),
@@ -117,10 +137,13 @@ export function AppProvider({ children }) {
       }
     } catch (e) {
       console.error("Failed to fetch inspections:", e);
+    } finally {
+      setIsLoadingInspections(false);
     }
   };
 
   const fetchRoommatesDeck = async () => {
+    setIsLoadingRoommates(true);
     try {
       const res = await fetch("/api/roommates/deck", {
         headers: getAuthHeaders(),
@@ -131,10 +154,13 @@ export function AppProvider({ children }) {
       }
     } catch (e) {
       console.error("Failed to fetch roommates deck:", e);
+    } finally {
+      setIsLoadingRoommates(false);
     }
   };
 
   const fetchChatsInbox = async () => {
+    setIsLoadingChats(true);
     try {
       const res = await fetch("/api/chats", {
         headers: getAuthHeaders(),
@@ -145,6 +171,8 @@ export function AppProvider({ children }) {
       }
     } catch (e) {
       console.error("Failed to fetch chats inbox:", e);
+    } finally {
+      setIsLoadingChats(false);
     }
   };
 
@@ -434,6 +462,8 @@ export function AppProvider({ children }) {
         setShowAuthModal,
         authTab,
         setAuthTab,
+        showLogoutModal,
+        setShowLogoutModal,
         properties,
         setProperties,
         favorites,
@@ -463,10 +493,17 @@ export function AppProvider({ children }) {
         fetchPropertyReviews,
         updateUserProfile,
         requestInspection,
-        addPropertyReview
+        addPropertyReview,
+        isLoadingSession,
+        isLoadingProperties,
+        isLoadingFavorites,
+        isLoadingInspections,
+        isLoadingRoommates,
+        isLoadingChats
       }}
     >
       {children}
+      <LogoutModal />
     </AppContext.Provider>
   );
 }

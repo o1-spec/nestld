@@ -20,7 +20,7 @@ export default function Header() {
   const {
     currentUser,
     setCurrentUser,
-    logoutUser,
+    setShowLogoutModal,
     setShowAuthModal,
     setAuthTab,
     matchesList,
@@ -31,8 +31,7 @@ export default function Header() {
   } = useApp();
 
   const handleLogout = () => {
-    logoutUser();
-    router.push("/");
+    setShowLogoutModal(true);
   };
 
   const handlePostClick = () => {

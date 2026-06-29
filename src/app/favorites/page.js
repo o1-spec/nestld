@@ -22,7 +22,7 @@ import PropertyDetailsModal from "@/components/PropertyDetailsModal";
 
 export default function FavoritesPage() {
   const router = useRouter();
-  const { favorites, properties, toggleFavorite } = useApp();
+  const { favorites, properties, toggleFavorite, isLoadingFavorites } = useApp();
 
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [compareList, setCompareList] = useState([]); // Array of property objects
@@ -90,7 +90,26 @@ export default function FavoritesPage() {
           </div>
 
           {/* Grid or Empty State */}
-          {savedProperties.length > 0 ? (
+          {isLoadingFavorites ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3].map((n) => (
+                <div
+                  key={n}
+                  className="bg-white rounded-3xl overflow-hidden border border-slate-200/80 shadow-md animate-pulse flex flex-col h-[400px]"
+                >
+                  <div className="bg-slate-200 aspect-video w-full" />
+                  <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                    <div className="space-y-3 text-left">
+                      <div className="h-3 bg-slate-200 rounded w-1/3" />
+                      <div className="h-5 bg-slate-200 rounded w-3/4" />
+                      <div className="h-4 bg-slate-200 rounded w-5/6" />
+                    </div>
+                    <div className="h-8 bg-slate-200 rounded w-full mt-4" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : savedProperties.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {savedProperties.map((prop) => {
                 const isSaved = favorites.has(prop.id);

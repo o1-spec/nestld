@@ -35,6 +35,7 @@ export default function HomeListingPage() {
     setActiveChat,
     chatMessages,
     setChatMessages,
+    isLoadingProperties
   } = useApp();
 
   // Search & Filter State
@@ -552,7 +553,29 @@ export default function HomeListingPage() {
               </div>
             </div>
 
-            {filteredProperties.length > 0 ? (
+            {isLoadingProperties ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 sm:gap-6">
+                {[1, 2, 3].map((n) => (
+                  <div
+                    key={n}
+                    className="bg-white rounded-2xl overflow-hidden border border-slate-200/85 shadow-md animate-pulse flex flex-col h-[440px]"
+                  >
+                    <div className="bg-slate-250 aspect-4/3 w-full" />
+                    <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between space-y-4 text-left">
+                      <div className="space-y-3">
+                        <div className="h-3 bg-slate-200 rounded w-1/3" />
+                        <div className="h-5 bg-slate-200 rounded w-3/4" />
+                        <div className="h-4 bg-slate-200 rounded w-5/6" />
+                      </div>
+                      <div className="space-y-2">
+                        <div className="h-3 bg-slate-200 rounded w-1/2" />
+                        <div className="h-8 bg-slate-200 rounded w-full mt-2" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : filteredProperties.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 sm:gap-6">
                 {filteredProperties.map((prop) => {
                   const isFav = favorites.has(prop.id);

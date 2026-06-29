@@ -11,6 +11,10 @@ const UserSchema = new mongoose.Schema(
     department: { type: String },
     yearOfStudy: { type: String },
     budget: { type: Number },
+    age: { type: Number },
+    gender: { type: String },
+    bio: { type: String },
+    avatar: { type: String },
     habits: {
       cleanliness: { type: String },
       sleep: { type: String },
